@@ -4,13 +4,14 @@ import App from './components/app';
 
 import HomeIndex from './components/index_home';
 import NewGame from './components/newgame';
+import GameContainer from './components/gamecontainer';
 
 export default (
     <Router history={browserHistory}>
         <Route path="/" component={App}>
             <IndexRoute component={HomeIndex} />
             <Route path="/play" component={NewGame} />
-            {/* <Route path="/game/:gameroom/:user/:team" components={GameInterface} /> */}
+            <Route path="/game/:gameroom/:player" components={GameContainer} />
         </Route>
     </Router>
 

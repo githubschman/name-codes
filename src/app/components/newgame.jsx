@@ -11,24 +11,33 @@ class NewGame extends Component {
         super(props);
         this.onFormSubmit = this.onFormSubmit.bind(this);
         this.state = {
-            gameroom: 'a',
-            playerName: 'b',
-            team: 'c'
+            gameroom: '',
+            playerName: '',
+            team: 'red'
         };
     }
 
     onFormSubmit(event) {
         event.preventDefault();
-
+        console.log(this.state)
         // redirects to gameroom:
         let roomName = this.state.gameroom;
-        let gameroomRoute = '/game/:' + roomName;
+        let gameroomRoute = '/game/' + roomName + '/' + this.state.playerName;
 
-        this.props.startNewGame(({room: this.state.gameroom, player: this.state.playerName, team: this.state.team}))
-            .then(() => {
-                this.props.history.push(gameroomRoute);
-            })
-            .catch(console.error)
+        this.props.startNewGame(({room: this.state.gameroom, player: this.state.playerName, team: this.state.team}));
+        this.props.history.push(gameroomRoute);
+    }
+
+    handleGameroomChange = (event) => {
+        this.setState({gameroom: event.target.value});
+    }
+
+    handleNameChange = (event) => {
+        this.setState({playerName: event.target.value});
+    }
+
+    handleTeamChange = (event) => {
+        this.setState({team: event.target.value});
     }
 
     render() {
@@ -39,6 +48,7 @@ class NewGame extends Component {
                     <div className="form-group">
                         <label htmlFor="txtEmail">Enter the Name of Your Game Room</label>
                         <input
+                          value={this.state.gameroom} onChange={this.handleGameroomChange} 
                           className="form-control" id="txtEmail" ref="email" placeholder="Gameroom Name"
                           name="email"
                         />
@@ -46,15 +56,16 @@ class NewGame extends Component {
                     <div className="form-group">
                         <label htmlFor="txtEmail">Enter Your Name</label>
                         <input
+                          value={this.state.playerName} onChange={this.handleNameChange} 
                           className="form-control" id="txtEmail" ref="email" placeholder="My Name"
                           name="email"
                         />
                     </div>
                     <div className="form-group">
                         <label htmlFor="txtPass">What Team are you Playing On?</label>
-                        <select>
-                            <option value="east">East Cost</option>
-                            <option value="west">West Coast</option>
+                        <select value={this.state.team} onChange={this.handleTeamChange} >
+                            <option value="red">Red</option>
+                            <option value="blue">Blue</option>
                         </select>
                     </div>
                     <button type="submit" className="btn btn-default btn-block">Play!</button>
