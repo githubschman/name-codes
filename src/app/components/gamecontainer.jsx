@@ -16,6 +16,7 @@ class GameContainer extends Component {
 
     componentDidMount() { //ngoninit
         const { match: { params } } = this.props;
+
         this.setState({ user });
       }
 

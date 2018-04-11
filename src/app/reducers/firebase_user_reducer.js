@@ -17,4 +17,6 @@ export default function (state = null, action) {
 
 function startNewGame(room, player, team) {
   return FireBaseTools.startNewGame(room, player, team);
+
+  // determine now to return the resolved promise here.
 }
