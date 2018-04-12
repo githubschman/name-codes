@@ -3,9 +3,6 @@ logs
 *.log
 npm-debug.log*
 
-#
-dist
-
 # Runtime data
 pids
 *.pid
@@ -41,6 +38,3 @@ jspm_packages
 .idea/
 .vscode
 firebase-debug.log
-
-# secrets
-secrets.js
