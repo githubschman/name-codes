@@ -17,21 +17,21 @@ const twentyFiveWords = () => {
     return words;
 }
 
-const createGameSpots = () =>{
+const createGameSpots = (redLen, blueLen) =>{
     let spots = {red: [], blue: [], dead: []};
     while(spots.dead.length < 1) {
         let num = Math.floor(Math.random() * 25);
         spots.dead.push(num);
     }
-    while(spots.red.length < 8) {
+    while(spots.red.length < redLen) {
         let num = Math.floor(Math.random() * 25);
-        if (!spots.dead.includes(num)) {
+        if (!spots.dead.includes(num) && !spots.red.includes(num)) {
             spots.red.push(num);
         }
     }
-    while(spots.blue.length < 8) {
+    while(spots.blue.length < blueLen) {
         let num = Math.floor(Math.random() * 25);
-        if (!spots.red.includes(num) && !spots.dead.includes(num)) {
+        if (!spots.red.includes(num) && !spots.dead.includes(num) && !spots.blue.includes(num)) {
             spots.blue.push(num);
         }
     }
@@ -80,14 +80,20 @@ const FireBaseTools = {
         return firebaseApp.database().ref(`games/${room}`).once('value')
             .then(snapshot => snapshot.val())
             .then(gameRoom => {
+                let redNum = 8;
+                let blueNum = 8;
                 if (team === 'red') {
                     redArr.push(player);
+                    redNum = 9;
                 } else {
                     blueArr.push(player);
+                    blueNum = 9;
                 }
+
+                console.log(redNum, blueNum)
                 if (!gameRoom) {
                     // room doesnt exist
-                    let spots = createGameSpots();
+                    let spots = createGameSpots(redNum, blueNum);
                     firebaseApp.database().ref(`games/${room}`).set({
                         'red': redArr,
                         'blue': blueArr,

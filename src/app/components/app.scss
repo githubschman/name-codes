@@ -17,6 +17,12 @@ body {
   grid-gap: 1px;
 }
 
+.gameInfo {
+  display: grid;
+  grid-template-columns: 25em 25em;
+  grid-gap: 1px;
+}
+
 .red-spot {
   background-color: rgb(238, 195, 175);
 }

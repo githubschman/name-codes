@@ -18,7 +18,8 @@ class GameContainer extends Component {
             gameState: null,
             moves: [],
             spaceClasses: [],
-            team: ''
+            team: '',
+            firstTeam: ''
         };
         
         this.ref = firebaseDb.ref(`games/${this.props.params.gameroom}`);
@@ -44,7 +45,7 @@ class GameContainer extends Component {
         if(this.state.gameState == null) {
             this.setState({gameState: gameState})
         }
-        this.setState({moves: gameState.moves, spaceClasses: gameState.spaceClasses})
+        this.setState({moves: gameState.moves, spaceClasses: gameState.spaceClasses, firstTeam: gameState.blueSpots.length > gameState.redSpots.length ? 'blue' : 'reds'})
     }
 
     componentDidMount() { //ngoninit
@@ -106,9 +107,12 @@ class GameContainer extends Component {
         return (
             <div>
                <h1>Welcome to {this.props.params.gameroom}</h1>
-               <h3>Team Blue Clue Giver: {this.state.blueMaster ? this.state.blueMaster : null}</h3>
-               <h3>Team Red Clue Giver: {this.state.redMaster ? this.state.redMaster : null}</h3>
-               {this.state.isMaster ? '(YOU ARE A CLUE GIVER!)' : 'You are a normal player and not a clue giver'}
+               <p>{this.state.firstTeam} goes first</p>
+               <div className="gameInfo">
+                <h3>Team Blue Clue Giver: {this.state.blueMaster ? this.state.blueMaster : '-'}</h3>
+                <h3>Team Red Clue Giver: {this.state.redMaster ? this.state.redMaster : '-'}</h3>
+               </div>
+               <p>{this.state.isMaster ? '(YOU ARE A CLUE GIVER!)' : 'You are a normal player and not a clue giver'}</p>
                <div className="board">
                     {this.state.gameState && this.state.gameState.words ?
                     this.state.gameState.words.map((word, i) =>
