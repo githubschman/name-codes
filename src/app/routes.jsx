@@ -11,7 +11,7 @@ export default (
         <Route path="/" component={App}>
             <IndexRoute component={HomeIndex} />
             <Route path="/play" component={NewGame} />
-            <Route path="/game/:gameroom/:player" components={GameContainer} />
+            <Route path="/game/:gameroom/:player/:team" components={GameContainer} />
         </Route>
     </Router>
 

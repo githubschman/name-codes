@@ -5,6 +5,7 @@ import { createStore, applyMiddleware, compose } from 'redux';
 import { Router, browserHistory } from 'react-router';
 import { createLogger } from 'redux-logger';
 import ReduxPromise from 'redux-promise';
+import thunkMiddleware from 'redux-thunk' 
 
 
 import reducers from './reducers';
@@ -15,14 +16,14 @@ import 'bootstrap-social';
 // for bundling your styles
 import './bundle.scss';
 
-const createStoreWithMiddleware = applyMiddleware(ReduxPromise)(createStore);
+const createStoreWithMiddleware = applyMiddleware(thunkMiddleware)(createStore);
 
 // Redux Dev tools
 const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;
 
 const logger = createLogger();
 
-const enhancers = [applyMiddleware(ReduxPromise, logger)];
+const enhancers = [applyMiddleware(thunkMiddleware, logger)];
 
 const store = createStore(reducers, composeEnhancers(...enhancers));
 

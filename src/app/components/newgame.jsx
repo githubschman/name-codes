@@ -19,10 +19,9 @@ class NewGame extends Component {
 
     onFormSubmit(event) {
         event.preventDefault();
-        console.log(this.state)
         // redirects to gameroom:
         let roomName = this.state.gameroom;
-        let gameroomRoute = '/game/' + roomName + '/' + this.state.playerName;
+        let gameroomRoute = '/game/' + roomName + '/' + this.state.playerName + '/' + this.state.team;
 
         this.props.startNewGame(({room: this.state.gameroom, player: this.state.playerName, team: this.state.team}));
         this.props.history.push(gameroomRoute);
