@@ -2,3 +2,4 @@
 export const GET_GAME_STATE = 'GET_GAME_STATE';
 export const START_NEW_GAME = 'START_NEW_GAME';
 export const UPDATE_MOVES = 'UPDATE_MOVES';
+export const GAME_OVER_ACCEPTED = 'GAME_OVER_ACCEPTED'

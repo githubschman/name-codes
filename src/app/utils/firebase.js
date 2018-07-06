@@ -71,7 +71,7 @@ const spaceClasses = (spots) => {
 
 const FireBaseTools = {
 
-    startNewGame: (room, player, team) => {
+    startNewGame: (room, player, team, master) => {
         // add player to gameroom
         // if they're the first person on their team, they are the clue-giver
         let redArr = [];
@@ -80,17 +80,23 @@ const FireBaseTools = {
         return firebaseApp.database().ref(`games/${room}`).once('value')
             .then(snapshot => snapshot.val())
             .then(gameRoom => {
+                let playerObj = {};
                 let redNum = 8;
                 let blueNum = 8;
                 if (team === 'red') {
-                    redArr.push(player);
+                    playerObj.name = player;
+                    playerObj.id = redArr.length;
+                    playerObj.type = master;
+                    redArr.push(playerObj);
                     redNum = 9;
                 } else {
-                    blueArr.push(player);
+                    playerObj.name = player;
+                    playerObj.id = redArr.length;
+                    playerObj.type = master;
+                    blueArr.push(playerObj);
                     blueNum = 9;
                 }
 
-                console.log(redNum, blueNum)
                 if (!gameRoom) {
                     // room doesnt exist
                     let spots = createGameSpots(redNum, blueNum);
@@ -102,7 +108,8 @@ const FireBaseTools = {
                         'blueSpots': spots.blue,
                         'deadSpot': spots.dead,
                         'spaceClasses': spaceClasses(spots),
-                        'moves': blankMoves()
+                        'moves': blankMoves(),
+                        'gameOver': false
                     });
                 } else {
                     // room exists
