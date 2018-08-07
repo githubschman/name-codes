@@ -13,7 +13,7 @@ export default function (state = null, action) {
   case GET_GAME_STATE:
     return action.data;
   case START_NEW_GAME:
-    startNewGame(action.data.room, action.data.player, action.data.team, action.data.master);
+    startNewGame(action.data.room, action.data.player, action.data.team, action.data.master, action.data.timed);
   case GET_GAME_STATE:
     return Object.assign({}, action.data.gameroom, action.data.moves);
   case GAME_OVER_ACCEPTED:
@@ -23,6 +23,6 @@ export default function (state = null, action) {
   }
 }
 
-function startNewGame(room, player, team, master) {
-  return FireBaseTools.startNewGame(room, player, team, master);
+function startNewGame(room, player, team, master, timed) {
+  return FireBaseTools.startNewGame(room, player, team, master, timed);
 }

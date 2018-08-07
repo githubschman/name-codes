@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import { browserHistory, Link, withRouter } from 'react-router';
+import { firebaseDb } from '../utils/firebase';
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { startNewGame  } from '../actions/firebase_actions';
@@ -9,22 +10,48 @@ class NewGame extends Component {
 
     constructor(props) {
         super(props);
-        this.onFormSubmit = this.onFormSubmit.bind(this);
         this.state = {
             gameroom: '',
             playerName: '',
             team: 'red',
-            master: 'normal'
+            master: 'normal',
+            newGame: true,
+            existingGame: false,
+            timed: false
         };
     }
 
-    onFormSubmit(event) {
-        event.preventDefault();
-        // redirects to gameroom:
-        let roomName = this.state.gameroom;
-        let gameroomRoute = '/game/' + roomName + '/' + this.state.playerName + '/' + this.state.team;
 
-        this.props.startNewGame(({room: this.state.gameroom, player: this.state.playerName, team: this.state.team, master: this.state.master}));
+    onFormSubmit = (event) => {
+        if (event) {
+            event.preventDefault();
+        }
+        if (this.state.newGame) {
+            // generate game code
+            let foundEmptyRoom = false;
+            let i = 0;
+            let code = Math.random().toString(36).substring(7);                
+            this.tryRef = firebaseDb.ref(`games/${code}`);
+            this.tryRef.once('value', (snapshot) => {
+                if (snapshot.val() == null) {
+                    foundEmptyRoom = true;
+                    this.launchNewGame(code);
+                } else {
+                    this.onFormSubmit(null);
+                }
+            });
+        
+        } else {
+            this.launchNewGame();
+        }
+    }
+
+    launchNewGame = (randomName) => {
+        // redirects to gameroom:
+        let roomName = randomName ? randomName : this.state.gameroom;
+        let gameroomRoute = '/game/' + roomName + '/' + (this.state.playerName.length ? this.state.playerName.split(' ').join('') : 'nonamefool') + '/' + this.state.team;
+        console.log(this.state.timed)
+        this.props.startNewGame(({room: roomName, player: this.state.playerName || 'no name fool', team: this.state.team || 'red', master: this.state.master, timed: this.state.timed}));
         this.props.history.push(gameroomRoute);
     }
 
@@ -43,26 +70,48 @@ class NewGame extends Component {
     handleMasterChange = (event) => {
         this.setState({master: event.target.value})
     }
+    
+    handleTimedGame = () => {
+        this.setState({timed: !this.state.timed})
+    }
+
+    handleToggleNewGame = () => {
+        this.setState({newGame: !this.state.newGame, 
+                        existingGame: !this.state.newGame === true ? false : this.state.existingGame,
+                        gameroom: !this.state.newGame === false ? '' : this.state.gameroom
+                        });
+    }
+
+    handleShowExistingGame = () => {
+        this.setState({
+                existingGame: !this.state.existingGame, 
+                newGame: !this.state.existingGame === true ? false : this.state.newGame,
+                gameroom: !this.state.existingGame === false ? '' : this.state.gameroom})
+    }
 
     render() {
         return (
             <div className="col-md-4">
                 <form id="frmLogin" role="form" onSubmit={this.onFormSubmit}>
                     <h2>Create a New Game!</h2>
-                    <div className="form-group">
-                        <label>Enter the Name of Your Game Room</label>
-                        <input
-                          value={this.state.gameroom} onChange={this.handleGameroomChange} 
-                          className="form-control" id="txtEmail" ref="email" placeholder="Gameroom Name"
-                          name="email"
-                        />
-                    </div>
+                    create a new game <input type="checkbox" checked={this.state.newGame && !this.state.exisitngGame} onChange={() => this.handleToggleNewGame()} />
+                    join an existing game <input type = "checkbox" checked={this.state.existingGame && !this.state.newGame} onChange={() => this.handleShowExistingGame()} />
+                    {this.state.existingGame ?             
+                        <div className="form-group">
+                            <label>Enter the Game Code</label>
+                            <input
+                            value={this.state.gameroom} onChange={this.handleGameroomChange} 
+                            className="form-control" id="txtEmail" placeholder="Gameroom Name"
+                            />
+                        </div> : 
+                    null}
+                    {!this.state.existingGame && this.state.newGame ? <div> timed game<input type = "checkbox" checked={this.state.timed} onChange={() => this.handleTimedGame()} /> </div>
+                     : null }
                     <div className="form-group">
                         <label>Enter Your Name</label>
                         <input
                           value={this.state.playerName} onChange={this.handleNameChange} 
-                          className="form-control" id="txtEmail" ref="email" placeholder="My Name"
-                          name="email"
+                          className="form-control" id="txtEmail" placeholder="My Name"
                         />
                     </div>
                     <div className="form-group">

@@ -33,13 +33,11 @@ class GameContainer extends Component {
 
         let playerName = this.props.params.player;
         let yourTeam = this.props.params.team;
-        let playerObj = gameState[yourTeam].find(member => member.name === playerName);
-        console.log(playerObj)
+        let playerObj = gameState[yourTeam] ? gameState[yourTeam].find(member => member.name === playerName) : {};
         let blueMaster = gameState.blue ? gameState.blue.filter(member => member.type !== 'normal') : [];
         let redMaster = gameState.red ? gameState.red.filter(member => member.type !== 'normal') : [];
 
-        console.log(playerObj.type)
-        if (playerObj.type !== 'normal') {
+        if (playerObj && playerObj.type !== 'normal') {
             this.setState({isMaster: true})
         }
 
