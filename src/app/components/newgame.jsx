@@ -17,7 +17,8 @@ class NewGame extends Component {
             master: 'normal',
             newGame: true,
             existingGame: false,
-            timed: false
+            timer: false,
+            time: 1
         };
     }
 
@@ -49,9 +50,9 @@ class NewGame extends Component {
     launchNewGame = (randomName) => {
         // redirects to gameroom:
         let roomName = randomName ? randomName : this.state.gameroom;
-        let gameroomRoute = '/game/' + roomName + '/' + (this.state.playerName.length ? this.state.playerName.split(' ').join('') : 'nonamefool') + '/' + this.state.team;
-        console.log(this.state.timed)
-        this.props.startNewGame(({room: roomName, player: this.state.playerName || 'no name fool', team: this.state.team || 'red', master: this.state.master, timed: this.state.timed}));
+        let id = Math.random().toString(36).substring(7);
+        let gameroomRoute = '/game/' + roomName + '/' + (this.state.playerName.length ? this.state.playerName.split(' ').join('') : 'nonamefool') + '/' + this.state.team + '/' + id;
+        this.props.startNewGame(({room: roomName, player: this.state.playerName || 'no name fool', team: this.state.team || 'red', master: this.state.master, timer: this.state.timer ? this.state.time : 0, id: id}));
         this.props.history.push(gameroomRoute);
     }
 
@@ -63,6 +64,10 @@ class NewGame extends Component {
         this.setState({playerName: event.target.value});
     }
 
+    handleTimeChange = (event) => {
+        this.setState({time: Number(event.target.value)})
+    }
+
     handleTeamChange = (event) => {
         this.setState({team: event.target.value});
     }
@@ -71,15 +76,15 @@ class NewGame extends Component {
         this.setState({master: event.target.value})
     }
     
-    handleTimedGame = () => {
-        this.setState({timed: !this.state.timed})
+    handletimerGame = () => {
+        this.setState({timer: !this.state.timer})
     }
 
     handleToggleNewGame = () => {
         this.setState({newGame: !this.state.newGame, 
                         existingGame: !this.state.newGame === true ? false : this.state.existingGame,
                         gameroom: !this.state.newGame === false ? '' : this.state.gameroom
-                        });
+                    });
     }
 
     handleShowExistingGame = () => {
@@ -101,17 +106,27 @@ class NewGame extends Component {
                             <label>Enter the Game Code</label>
                             <input
                             value={this.state.gameroom} onChange={this.handleGameroomChange} 
-                            className="form-control" id="txtEmail" placeholder="Gameroom Name"
+                            className="form-control" placeholder="Gameroom Name"
                             />
                         </div> : 
                     null}
-                    {!this.state.existingGame && this.state.newGame ? <div> timed game<input type = "checkbox" checked={this.state.timed} onChange={() => this.handleTimedGame()} /> </div>
+                    {!this.state.existingGame && this.state.newGame ? <div> timed game<input type = "checkbox" checked={this.state.timer} onChange={() => this.handletimerGame()} /> </div>
                      : null }
+                    {this.state.timer && !this.state.existingGame && this.state.newGame ?                     
+                        <div className="form-group">
+                            <label>minutes per round</label>
+                            <input
+                            min="1" max="20"
+                            type="number"
+                            value={this.state.time} onChange={this.handleTimeChange} 
+                            className="form-control" placeholder="1"
+                            />
+                        </div> : null}
                     <div className="form-group">
                         <label>Enter Your Name</label>
                         <input
                           value={this.state.playerName} onChange={this.handleNameChange} 
-                          className="form-control" id="txtEmail" placeholder="My Name"
+                          className="form-control" placeholder="My Name"
                         />
                     </div>
                     <div className="form-group">

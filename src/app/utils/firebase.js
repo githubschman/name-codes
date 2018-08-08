@@ -71,8 +71,7 @@ const spaceClasses = (spots) => {
 
 const FireBaseTools = {
 
-    startNewGame: (room, player, team, master, timed) => {
-        console.log(timed)
+    startNewGame: (room, player, team, master, timer, id) => {
         // add player to gameroom
         // if they're the first person on their team, they are the clue-giver
         let redArr = [];
@@ -88,12 +87,14 @@ const FireBaseTools = {
                     playerObj.name = player;
                     playerObj.id = redArr.length;
                     playerObj.type = master;
+                    playerObj.id = id;
                     redArr.push(playerObj);
                     redNum = 9;
                 } else {
                     playerObj.name = player;
                     playerObj.id = redArr.length;
                     playerObj.type = master;
+                    playerObj.id = id;
                     blueArr.push(playerObj);
                     blueNum = 9;
                 }
@@ -111,7 +112,7 @@ const FireBaseTools = {
                         'spaceClasses': spaceClasses(spots),
                         'moves': blankMoves(),
                         'gameOver': false,
-                        'timed': timed || false
+                        'timer': timer > 0 ? timer : false
                     });
                 } else {
                     // room exists

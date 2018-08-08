@@ -41,7 +41,7 @@ class App extends Component {
     return (      
       <div>
         <header className="navbar navbar-static-top navbar-inverse" id="top" role="banner">
-          <div className="container">
+          <div>
             <div className="navbar-header">
               <button
                 className="navbar-toggle collapsed" type="button" data-toggle="collapse" data-target=".bs-navbar-collapse">
@@ -63,7 +63,7 @@ class App extends Component {
           </div>
         </header>
 
-        <div className="container">
+        <div className="game-container">
          {this.props.children}
         </div>
       </div>

@@ -42,6 +42,35 @@ export const initGameState = data => dispatch => {
     .catch(console.error)
 }
 
+export const takeTurn = data => dispatch => {
+  const { room, word, num, team } = data;
+  firebaseDb.ref(`games/${room}`).once('value')
+  .then(snapshot => snapshot.val())
+  .then(gameRoom => {
+    firebaseDb.ref(`games/${room}`).update({
+      'currentTurn': team, // team == 'reds' ? 'blue' : 'reds',
+      'activeWord': word,
+      'activeNum': num
+    });
+    dispatch(getGameState(gameRoom));
+  })
+  .catch(console.error)
+}
+
+export const sendNewTick = data => dispatch => {
+  const { room, sec } = data;
+  console.log(data)
+  firebaseDb.ref(`games/${room}`).once('value')
+  .then(snapshot => snapshot.val())
+  .then(gameRoom => {
+    firebaseDb.ref(`games/${room}`).update({
+      'tick': sec
+    });
+    dispatch(getGameState(gameRoom));
+  })
+  .catch(console.error)
+}
+
 export const chooseCard = (num, room, dead) => dispatch => {
   firebaseDb.ref(`games/${room}`).once('value')
     .then(snapshot => snapshot.val())
