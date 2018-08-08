@@ -25,7 +25,7 @@ class GameContainer extends Component {
             activeClue: {word: '?', num: 0},
             isTimed: false,
             secondsLeft: null,
-            timerTicking: false,
+            showTurnButton: false,
             originalTime: 0
         };
         
@@ -37,9 +37,6 @@ class GameContainer extends Component {
         if (!snapshot || snapshot.val() == null) return;
         let gameState = snapshot.val();
 
-        let playerName = this.props.params.player;
-        let yourTeam = this.props.params.team;
-        let playerObj = gameState[yourTeam] ? gameState[yourTeam].find(member => member.name === playerName) : {};
         let blueMaster = gameState.blue ? gameState.blue.filter(member => member.type !== 'normal') : [];
         let redMaster = gameState.red ? gameState.red.filter(member => member.type !== 'normal') : [];
         let advantage = gameState.blueSpots.length > gameState.redSpots.length ? 'blue' : 'red';
@@ -48,14 +45,14 @@ class GameContainer extends Component {
         let secLeft = this.state.secondsLeft;
 
         if (secLeft == null || (!gameState.tick || gameState.tick < 0)) {
-            console.log('resetting to original time')
+            // reset to original time
             secLeft = (gameState.timer * 1000) * 60;
         } else if (gameState.tick) {
             secLeft = gameState.tick;
         }
 
         this.setState({ gameState: this.state.gameState == null ? gameState : this.state.gameState, 
-                        team: yourTeam,
+                        team: this.props.params.team,
                         isMaster: this.determineIfMaster(gameState),
                         blueMaster: blueMaster, 
                         redMaster: redMaster, 
@@ -81,9 +78,9 @@ class GameContainer extends Component {
 
     determineIfMaster = (initialGameState) => {
         let id = this.props.params.playerId;
-        let playerObj = initialGameState[this.props.params.team].find(member => member.id === id);
+        let playerObj = initialGameState[this.props.params.team] ? initialGameState[this.props.params.team].find(member => member.id === id) : null;
 
-        if (playerObj.type === 'normal') {
+        if (playerObj && playerObj.type === 'normal') {
             return false;
         } else {
             return true;
@@ -101,9 +98,7 @@ class GameContainer extends Component {
 
     componentWillReceiveProps(newProps) {
         if (newProps && newProps.gameState) {
-            // this.setState({
-            //     team: this.determineTeam(newProps.gameState)
-            // })
+            // 
         }
     }
 
@@ -120,10 +115,10 @@ class GameContainer extends Component {
     }
 
     handleSelection = (cardNum) => {
-        let className = this.determineClassName(cardNum);
-        let dead = className === 'word-button dead-spot' ? true : false;
         if (!this.state.isMaster && this.state.team === this.state.whosTurn) {
-            // only players can make selections
+            // only players (not spymasters) can make selections
+            let className = this.determineClassName(cardNum);
+            let dead = className === 'word-button dead-spot' ? true : false;
             this.props.playerChoice(cardNum, this.props.params.gameroom, dead);
         }
     }
@@ -135,7 +130,8 @@ class GameContainer extends Component {
     handleActiveClue = (event) => {
         this.setState({clue: 
                         { word: event.target.id === 'word' ? event.target.value : this.state.clue.word,
-                          num:  event.target.id === 'num' ? Number(event.target.value) : this.state.clue.num}})
+                          num:  event.target.id === 'num' ? Number(event.target.value) : this.state.clue.num }
+                    });
     }
 
     takeYourTurn = (event) => {
@@ -152,11 +148,17 @@ class GameContainer extends Component {
                     this.resetTurn();
                 }
             }, 1000);
+        } else {
+            this.props.sendTick(1000, this.props.params.gameroom);
+            this.setState({showTurnButton: true})
         }
     }
 
     resetTurn() {
         this.props.takeTurnSwitchTeams(this.props.params.gameroom, '', '', this.state.whosTurn === 'red' ? 'blue' : 'red');
+        if (!this.state.isTimed) {
+            this.setState({showTurnButton: false});
+        }
     }
 
     copyToClipboard = () => {
@@ -174,7 +176,7 @@ class GameContainer extends Component {
                 }
                <h1>Secret Code to Join: <span id="roomcode"> {this.props.params.gameroom} </span> </h1> <button onClick={this.copyToClipboard}>copy to clipboard</button>
                <p>{this.state.firstTeam} goes first</p>
-                {this.state.isMaster && this.state.whosTurn === this.state.team && !this.state.timerTicking ? 
+                {this.state.isMaster && this.state.whosTurn === this.state.team && (this.state.secondsLeft <= 0 || this.state.secondsLeft === this.state.originalTime)? 
                 <form id="" role="form" onSubmit={this.takeYourTurn}>
                     <label>Enter Your Clue Word</label>
                     <input
@@ -195,10 +197,14 @@ class GameContainer extends Component {
                     <button type="submit" className="btn btn-default btn-block">Share Clue!</button>
                 </form> : null}
 
-                {(this.state.secondsLeft > 0 && this.state.secondsLeft !== this.state.originalTime) ?
+                {this.state.showTurnButton && this.state.whosTurn === this.state.team && this.state.isMaster ? 
+                    <button onClick={() => this.resetTurn()} className="btn btn-default btn-block">End Turn</button>
+                 : null}
+
+                {this.state.secondsLeft > 0 && this.state.secondsLeft !== this.state.originalTime ?
                     <div>
                         <h1>{ this.state.activeClue.word } { this.state.activeClue.num } </h1>
-                         {Math.floor(this.state.secondsLeft / 1000)}
+                         { this.state.isTimed ? Math.floor(this.state.secondsLeft / 1000) : null }
                     </div> : null}
 
                <div className="gameInfo">
@@ -207,7 +213,7 @@ class GameContainer extends Component {
                    return <p> { master.name } </p>
                }) : null }
                <h4>The Red Masters</h4>
-                {this.state.redMaster.length ? this.state.blueMaster.map(master => {
+                {this.state.redMaster.length ? this.state.redMaster.map(master => {
                    return <p> { master.name } </p>
                }) : null }
                </div>
