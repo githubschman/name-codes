@@ -1,10 +1,8 @@
 import React, { Component } from 'react';
-import { browserHistory, Link, withRouter } from 'react-router';
 import { connect } from 'react-redux';
-import { bindActionCreators } from 'redux';
-import { startNewGame, initGameState, chooseCard, takeTurn, acceptGameOver, sendNewTick  } from '../actions/firebase_actions';
+import { initGameState, chooseCard, takeTurn, acceptGameOver, sendNewTick, localUserData  } from '../actions/firebase_actions';
 import { firebaseDb } from '../utils/firebase';
-
+import Chat from './chat.jsx';
 
 class GameContainer extends Component {
 
@@ -26,9 +24,9 @@ class GameContainer extends Component {
             isTimed: false,
             secondsLeft: null,
             showTurnButton: false,
-            originalTime: 0
+            originalTime: 0,
+            copied: false
         };
-        
         this.ref = firebaseDb.ref(`games/${this.props.params.gameroom}`);
         this.ref.on('value', this.onChange.bind(this));
     }
@@ -67,13 +65,13 @@ class GameContainer extends Component {
                         gameOver: gameState.gameOver || this.state.gameState ? this.state.gameState.gameOver : false })
     }
 
-    componentDidMount() { //ngoninit
+    componentDidMount() {
         // look at params
         const { gameroom, player, team } = this.props.params;
         // dispatch get game state
         this.props.init({room: gameroom});
-        
         this.setState({team: team})
+        this.props.setUpPlayer({player, team, gameroom});
     }
 
     determineIfMaster = (initialGameState) => {
@@ -161,8 +159,17 @@ class GameContainer extends Component {
         }
     }
 
-    copyToClipboard = () => {
-
+    brieflyDisplayCopy = () => {
+        let crazySolution = document.createElement('textarea')
+        crazySolution.innerText = this.props.params.gameroom;
+        document.body.appendChild(crazySolution)
+        crazySolution.select()
+        document.execCommand('copy')
+        crazySolution.remove();
+        this.setState({copied: true});
+        setTimeout(() => {
+            this.setState({copied: false});
+        }, 5000);
     }
 
     render() {
@@ -174,7 +181,11 @@ class GameContainer extends Component {
                //  <button onClick={this.acceptFate}>okay</button>
                //</div> : null
                 }
-               <h1>Secret Code to Join: <span id="roomcode"> {this.props.params.gameroom} </span> </h1> <button onClick={this.copyToClipboard}>copy to clipboard</button>
+                <Chat />
+               <h1>Secret Code to Join: <span id="roomcode"> {this.props.params.gameroom} </span> </h1> 
+               <div>{this.props.params.gameroom}</div>
+                    <button onClick={this.brieflyDisplayCopy}>Copy to clipboard with button</button>
+               {this.state.copied ? <p>copied!</p> : null}
                <p>{this.state.firstTeam} goes first</p>
                 {this.state.isMaster && this.state.whosTurn === this.state.team && (this.state.secondsLeft <= 0 || this.state.secondsLeft === this.state.originalTime)? 
                 <form id="" role="form" onSubmit={this.takeYourTurn}>
@@ -235,7 +246,7 @@ class GameContainer extends Component {
 
 const mapDispatchToProps = function (dispatch) {
     return {
-        init(room){
+        init(room) {
             dispatch(initGameState(room));
         },
         playerChoice(num, room, choiceType) {
@@ -249,6 +260,9 @@ const mapDispatchToProps = function (dispatch) {
         },
         sendTick(sec, room) {
             dispatch(sendNewTick({sec, room}));
+        },
+        setUpPlayer(data) {
+            dispatch(localUserData(data));
         }
     }
   };

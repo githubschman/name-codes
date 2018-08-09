@@ -1,5 +1,4 @@
 import React, { Component } from 'react';
-import { browserHistory, Link, withRouter } from 'react-router';
 import { firebaseDb } from '../utils/firebase';
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
@@ -29,13 +28,11 @@ class NewGame extends Component {
         }
         if (this.state.newGame) {
             // generate game code
-            let foundEmptyRoom = false;
             let i = 0;
             let code = Math.random().toString(36).substring(7);                
             this.tryRef = firebaseDb.ref(`games/${code}`);
             this.tryRef.once('value', (snapshot) => {
                 if (snapshot.val() == null) {
-                    foundEmptyRoom = true;
                     this.launchNewGame(code);
                 } else {
                     this.onFormSubmit(null);

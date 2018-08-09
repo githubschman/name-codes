@@ -3,9 +3,7 @@ import { Link } from 'react-router';
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { logoutUser } from '../actions/firebase_actions';
-import FireBaseTools from '../utils/firebase'
-
-console.log(FireBaseTools.getDatabaseReference);
+import FireBaseTools from '../utils/firebase';
 
 class App extends Component {
 
