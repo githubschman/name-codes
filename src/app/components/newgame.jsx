@@ -29,7 +29,7 @@ class NewGame extends Component {
         if (this.state.newGame) {
             // generate game code
             let i = 0;
-            let code = Math.random().toString(36).substring(7);                
+            let code = Math.random().toString(36).slice(3,8);               
             this.tryRef = firebaseDb.ref(`games/${code}`);
             this.tryRef.once('value', (snapshot) => {
                 if (snapshot.val() == null) {
@@ -93,17 +93,19 @@ class NewGame extends Component {
 
     render() {
         return (
-            <div className="col-md-4">
-                <form id="frmLogin" role="form" onSubmit={this.onFormSubmit}>
-                    <h2>Create a New Game!</h2>
-                    create a new game <input type="checkbox" checked={this.state.newGame && !this.state.exisitngGame} onChange={() => this.handleToggleNewGame()} />
-                    join an existing game <input type = "checkbox" checked={this.state.existingGame && !this.state.newGame} onChange={() => this.handleShowExistingGame()} />
+            <div className="new-game">
+                <form role="form" onSubmit={this.onFormSubmit}>
+                    <h2 className="green-text">> Create Or Join a Mission</h2>
+                    create a new mission <input type="checkbox" checked={this.state.newGame && !this.state.exisitngGame} onChange={() => this.handleToggleNewGame()} /> <span className="green-text"> OR </span>
+                    join an existing mission <input type = "checkbox" checked={this.state.existingGame && !this.state.newGame} onChange={() => this.handleShowExistingGame()} />
                     {this.state.existingGame ?             
                         <div className="form-group">
-                            <label>Enter the Game Code</label>
+                            <label>Enter the Secret Code</label>
                             <input
+                            maxlength="5"
+                            minlength="5"
                             value={this.state.gameroom} onChange={this.handleGameroomChange} 
-                            className="form-control" placeholder="Gameroom Name"
+                            className="form-control" placeholder="Secret Code"
                             />
                         </div> : 
                     null}
@@ -120,10 +122,10 @@ class NewGame extends Component {
                             />
                         </div> : null}
                     <div className="form-group">
-                        <label>Enter Your Name</label>
+                        <label>Enter Your Alias</label>
                         <input
                           value={this.state.playerName} onChange={this.handleNameChange} 
-                          className="form-control" placeholder="My Name"
+                          className="form-control" placeholder="My Alias" required
                         />
                     </div>
                     <div className="form-group">
@@ -140,7 +142,7 @@ class NewGame extends Component {
                             <option value="normal">Normal Guy</option>
                         </select>
                     </div>
-                    <button type="submit" className="btn btn-default btn-block">Play!</button>
+                    <button type="submit" className="btn btn-default btn-block normalbutton">Play!</button>
                     <br />
                 </form>
             </div>

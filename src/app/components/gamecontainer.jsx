@@ -4,6 +4,17 @@ import { initGameState, chooseCard, takeTurn, acceptGameOver, sendNewTick, local
 import { firebaseDb } from '../utils/firebase';
 import Chat from './chat.jsx';
 
+
+import { slideInDown, slideOutUp } from 'react-animations';
+import { StyleSheet, css } from 'aphrodite';
+
+const animations = StyleSheet.create({
+    slidedown: {
+      animationName: slideInDown,
+      animationDuration: '1s'
+    }
+  });
+  
 class GameContainer extends Component {
 
     constructor(props) {
@@ -25,7 +36,8 @@ class GameContainer extends Component {
             secondsLeft: null,
             showTurnButton: false,
             originalTime: 0,
-            copied: false
+            copied: false,
+            showControlPanel: false,
         };
         this.ref = firebaseDb.ref(`games/${this.props.params.gameroom}`);
         this.ref.on('value', this.onChange.bind(this));
@@ -62,7 +74,8 @@ class GameContainer extends Component {
                         originalTime:  (gameState.timer * 1000) * 60,
                         secondsLeft: secLeft,
                         activeClue: { word: gameState.activeWord, num: gameState.activeNum },
-                        gameOver: gameState.gameOver || this.state.gameState ? this.state.gameState.gameOver : false })
+                        gameOver: gameState.gameOver || this.state.gameState ? this.state.gameState.gameOver : false });
+        this.props.init({room: this.props.params.gameroom});
     }
 
     componentDidMount() {
@@ -159,6 +172,10 @@ class GameContainer extends Component {
         }
     }
 
+    toggleControlPanel = () => {
+        this.setState({showControlPanel: !this.state.showControlPanel});
+    }
+
     brieflyDisplayCopy = () => {
         let crazySolution = document.createElement('textarea')
         crazySolution.innerText = this.props.params.gameroom;
@@ -169,25 +186,42 @@ class GameContainer extends Component {
         this.setState({copied: true});
         setTimeout(() => {
             this.setState({copied: false});
-        }, 5000);
+        }, 3000);
     }
 
     render() {
         return (
             <div className={this.state.whosTurn}>
-               {// this.state.gameOver ? 
-               // <div>
-                // <h1> accept ur fate </h1>
-               //  <button onClick={this.acceptFate}>okay</button>
-               //</div> : null
-                }
-                <Chat />
-               <h1>Secret Code to Join: <span id="roomcode"> {this.props.params.gameroom} </span> </h1> 
-               <div>{this.props.params.gameroom}</div>
-                    <button onClick={this.brieflyDisplayCopy}>Copy to clipboard with button</button>
-               {this.state.copied ? <p>copied!</p> : null}
-               <p>{this.state.firstTeam} goes first</p>
-                {this.state.isMaster && this.state.whosTurn === this.state.team && (this.state.secondsLeft <= 0 || this.state.secondsLeft === this.state.originalTime)? 
+
+                {this.state.showControlPanel ? <div className={css([animations.slidedown])}> 
+                    <div className="control-panel">
+                        <div className="alias-display">
+                            <span className="green-text">Your Alias:</span> {this.state.isMaster ? `${this.props.params.player}, a spy master for the ${this.state.team} team.` : `${this.props.params.player} on the ${this.state.team} team.`} <br />
+                            <span className="green-text">Secret Code to Join:</span> <span id="roomcode"> {this.props.params.gameroom} </span>
+                            <button className="normalbutton" onClick={this.brieflyDisplayCopy}>Copy to clipboard</button>
+                            {this.state.copied ? <p>copied!</p> : null} 
+                            <br />
+                        </div>
+                        <div className="master-display"> 
+                            <ul className="spy-list"><span className="green-text">Blue Spy Masters:</span>
+                            {this.state.blueMaster.length ? this.state.blueMaster.map(master => {
+                                return <li> { master.name } </li>
+                            }) : <li>none</li> }
+                            </ul>
+
+                            <ul className="spy-list"><span className="green-text">Red Spy Masters:</span>
+                                {this.state.redMaster.length ? this.state.redMaster.map(master => {
+                                return <li> { master.name } </li>
+                            }) : <li>none</li> }
+                            </ul>
+                        </div>
+                    </div>
+                    <button className="normalbutton"  onClick={() => this.toggleControlPanel()}>Hide ▲</button>
+                </div>  
+                : <button className="normalbutton" onClick={() => this.toggleControlPanel()}>Control Panel ▼</button> }
+                
+                
+                {this.state.isMaster && this.state.whosTurn === this.state.team && (this.state.secondsLeft <= 0 || this.state.secondsLeft === this.state.originalTime) ? 
                 <form id="" role="form" onSubmit={this.takeYourTurn}>
                     <label>Enter Your Clue Word</label>
                     <input
@@ -205,11 +239,11 @@ class GameContainer extends Component {
                             className="form-control" placeholder="1"
                         />
                     </div>
-                    <button type="submit" className="btn btn-default btn-block">Share Clue!</button>
+                    <button className="normalbutton" type="submit">Share Clue!</button>
                 </form> : null}
 
                 {this.state.showTurnButton && this.state.whosTurn === this.state.team && this.state.isMaster ? 
-                    <button onClick={() => this.resetTurn()} className="btn btn-default btn-block">End Turn</button>
+                    <button onClick={() => this.resetTurn()} className="normalbutton">End Turn</button>
                  : null}
 
                 {this.state.secondsLeft > 0 && this.state.secondsLeft !== this.state.originalTime ?
@@ -217,25 +251,16 @@ class GameContainer extends Component {
                         <h1>{ this.state.activeClue.word } { this.state.activeClue.num } </h1>
                          { this.state.isTimed ? Math.floor(this.state.secondsLeft / 1000) : null }
                     </div> : null}
-
-               <div className="gameInfo">
-               <h4>The Blue Masters</h4>
-               {this.state.blueMaster.length ? this.state.blueMaster.map(master => {
-                   return <p> { master.name } </p>
-               }) : null }
-               <h4>The Red Masters</h4>
-                {this.state.redMaster.length ? this.state.redMaster.map(master => {
-                   return <p> { master.name } </p>
-               }) : null }
-               </div>
-               <p>{this.state.isMaster ? `(YOU ARE A CLUE GIVER! for ${this.state.team} )` : 'You are a normal player and not a clue giver'}</p>
-               <div className="board">
-                    {this.state.gameState && this.state.gameState.words ?
-                    this.state.gameState.words.map((word, i) =>
-                        <div className="card">
-                            <button key={i} className={this.determineClassName(i)} value="word" onClick={() => this.handleSelection(i)}>{word}</button>
-                        </div>
-                ) : null}
+               <div className="board-container">
+                    <div className="board">
+                            {this.state.gameState && this.state.gameState.words ?
+                            this.state.gameState.words.map((word, i) =>
+                                <div className="card">
+                                    <button key={i} className={this.determineClassName(i)} value="word" onClick={() => this.handleSelection(i)}>{word}</button>
+                                </div>
+                        ) : null}
+                    </div>
+                    <Chat />
                </div>
             </div>
 

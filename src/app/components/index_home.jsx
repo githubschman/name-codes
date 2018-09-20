@@ -1,7 +1,7 @@
 import React from 'react';
 
 export default () => {
-  return <div> 
+  return <div className="new-game"> 
     <h1>Rules</h1> 
     <p>
     Name-codes is a game of guessing which code names (words) in a set are related to a hint-word given by another player.</p>

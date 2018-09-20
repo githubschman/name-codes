@@ -113,7 +113,7 @@ const FireBaseTools = {
                         'moves': blankMoves(),
                         'gameOver': false,
                         'timer': timer > 0 ? timer : false,
-                        'chats': [{name: 'agent x', content: 'welcome to name codes, yall'}]
+                        'chats': [{name: 'Agent Githubschman', content: 'Welcome to Name Codes, y\'all!'}]
                     });
                 } else {
                     // room exists
