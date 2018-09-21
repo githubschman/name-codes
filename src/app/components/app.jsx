@@ -10,7 +10,7 @@ import { StyleSheet, css } from 'aphrodite';
 const animations = StyleSheet.create({
   fadein: {
     animationName: fadeIn,
-    animationDuration: '2s'
+    animationDuration: '4s'
   },
 });
 
@@ -32,11 +32,13 @@ class App extends Component {
               </span>
               </div>
               </div>
-              <nav className="collapse navbar-collapse bs-navbar-collapse" role="navigation">
-                <ul className="nav navbar-nav navbar-right">
-                  <li key={1}><Link to="/play">Play</Link></li>
-                </ul>
-              </nav>
+                <nav className="collapse navbar-collapse bs-navbar-collapse" role="navigation">
+                  <div className="nav navbar-nav navbar-right play-button">
+                      <span className={css([animations.fadein])}>
+                        <Link to="/play">Play</Link>
+                      </span>
+                  </div>
+                </nav>
           </div>
         </header>
 

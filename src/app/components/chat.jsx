@@ -28,10 +28,9 @@ class Chat extends Component {
         this.scrollToBottom();
         if (this.props && this.props.gameState) {
             let chatColor = 'coral-text';
-            if (this.props.gameState.whosTurn === 'blue') {
+            if (this.props.gameState.currentTurn === 'blue') {
                 chatColor = 'green-text';
             }
-
             this.setState({chats: this.props.gameState.chats, chatColor});
             this.scrollToBottom();
         }
@@ -40,10 +39,9 @@ class Chat extends Component {
     componentWillReceiveProps(newProps) {
         if (newProps && newProps.gameState) {
             let chatColor = 'coral-text';
-            if (newProps.gameState.whosTurn === 'blue') {
+            if (newProps.gameState.currentTurn === 'blue') {
                 chatColor = 'green-text';
             }
-
             this.setState({chats: newProps.gameState.chats, chatColor});
             this.scrollToBottom();
         }
@@ -53,10 +51,14 @@ class Chat extends Component {
         this.setState({pendingMessage: event.target.value});
     }
 
+    didtheyhitenter = (event) => {
+        if (event.key === 'Enter') {
+            this.sendChat(null);
+        }
+    }
+
 
     sendChat = (event) => {
-        event.stopPropagation();
-        event.preventDefault();
         if (this.state.pendingMessage) {
             this.props.emitMessage(this.state.pendingMessage, this.props.player.player, this.props.player.gameroom);
             this.setState({pendingMessage: ''});
@@ -65,7 +67,7 @@ class Chat extends Component {
 
     render() {
         return (
-            <div className="chat">
+            <div>
                 <div className="sent-chats">{this.state.chats && this.state.chats.map(chat => {
                     return <div><span className={this.state.chatColor}>{chat.name}:</span> {chat.content} </div>
                 })}
@@ -73,16 +75,18 @@ class Chat extends Component {
                     ref={(el) => { this.messagesEnd = el; }}>
                 </div>
                 </div>
-                <form role="form" onSubmit={this.sendChat}>
+                <div>
                     <div className="form-group">
                         <input
-                          value={this.state.pendingMessage} onChange={this.writingNewMessage} 
+                          value={this.state.pendingMessage} 
+                          onKeyPress={(e) => this.didtheyhitenter(e)}
+                          onChange={this.writingNewMessage} 
                           className="form-control" placeholder="write message"
                         />
                     </div>
-                    <button type="submit" className="normalbutton">emit message</button>
+                    <button onClick={this.sendChat} className="normalbutton">emit message</button>
                     <br />
-                </form>
+                </div>
             </div>
 
         );

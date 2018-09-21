@@ -68,7 +68,8 @@ p {
 }
 
 .blue-spot {
-  background-color: paleturquoise;
+  background-color: #1d3b71;
+  color: #fff;
 }
 
 .board-container {
@@ -89,13 +90,22 @@ p {
   background-color: rgba(0, 0, 0, 0.397);
   color: #fff;
   margin-left: 25px;
-  height: 440px;
+  height: 400px;
+}
+
+.clue-section {
+  padding-top: 25px;
+  color: #fff;
 }
 
 .sent-chats {
-  height: 350px;
+  height: 320px;
   overflow-y: scroll;
   padding: 20px;
+}
+
+button {
+  border-width: 0px;
 }
 
 .gameInfo {
@@ -105,20 +115,37 @@ p {
 }
 
 .red-spot {
-  background-color: rgb(238, 195, 175);
+  background-color: #741212;
+  color: #fff;
 }
 
 .dead-spot {
-  background-color: grey;
+  background-color: rgb(27, 27, 27);
+  color: #fff;
 }
 
 .civ-spot {
-  background-color: lightgoldenrodyellow;
+  background-color: #e7d283;
 }
 
 .overlay {
-  background-color: #fff;
-  color: #fff;
+  background-color: #e7e7e7;
+  color: #f9f9f9;
+ }
+
+ .its-time {
+    color: #bbff00 !important;
+    font-weight: bolder;
+    font-size: 16px;
+    .its-clue {
+      color: #bbff00 !important;
+      font-weight: bolder;
+      font-size: 20px;
+    }
+    .its-guesses {
+      color: #fff !important;
+      font-size: 12px;
+    }
  }
 
  .wrapper {
@@ -185,6 +212,19 @@ select {
 a {
   font-family: 'Courier New', Courier, monospace;
   color: #bbff00 !important;
+}
+
+.play-button {
+  padding: 13px;
+}
+
+input {
+  background-color: #222222 !important;
+  color: #bbff00bd !important;
+  border-top: transparent !important;
+  border-left: transparent !important;
+  border-right: transparent !important;
+  border-bottom: transparent !important;
 }
 
 .nav :hover {

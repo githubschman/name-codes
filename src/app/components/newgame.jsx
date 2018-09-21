@@ -102,8 +102,8 @@ class NewGame extends Component {
                         <div className="form-group">
                             <label>Enter the Secret Code</label>
                             <input
-                            maxlength="5"
-                            minlength="5"
+                            maxLength="5"
+                            minLength="5"
                             value={this.state.gameroom} onChange={this.handleGameroomChange} 
                             className="form-control" placeholder="Secret Code"
                             />
