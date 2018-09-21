@@ -5,14 +5,18 @@ import { firebaseDb } from '../utils/firebase';
 import Chat from './chat.jsx';
 
 
-import { slideInDown, slideOutUp } from 'react-animations';
+import { slideInDown, flipInY } from 'react-animations';
 import { StyleSheet, css } from 'aphrodite';
 
 const animations = StyleSheet.create({
     slidedown: {
       animationName: slideInDown,
       animationDuration: '1s'
-    }
+    },
+    flipIn: {
+        animationName: flipInY,
+        animationDuration: '1s'
+    },
   });
   
 class GameContainer extends Component {
@@ -40,6 +44,7 @@ class GameContainer extends Component {
             showControlPanel: false,
             redTeamMembers: [],
             blueTeamMembers: [],
+            interval: null,
         };
         this.ref = firebaseDb.ref(`games/${this.props.params.gameroom}`);
         this.ref.on('value', this.onChange.bind(this));
@@ -152,7 +157,7 @@ class GameContainer extends Component {
         event.preventDefault();
         this.props.takeTurnSwitchTeams(this.props.params.gameroom, this.state.clue.word, this.state.clue.num, this.state.whosTurn)
         if (this.state.isTimed) {
-            this.setState({timerTicking: true});
+            this.setState({timerTicking: true, showTurnButton: true});
             let interval = setInterval(() => {
                 this.props.sendTick(this.state.secondsLeft - 1000, this.props.params.gameroom);
                 this.setState({secondsLeft: this.state.secondsLeft - 1000});
@@ -162,6 +167,7 @@ class GameContainer extends Component {
                     this.resetTurn();
                 }
             }, 1000);
+            this.setState({interval: interval});
         } else {
             this.props.sendTick(1000, this.props.params.gameroom);
             this.setState({showTurnButton: true})
@@ -169,10 +175,18 @@ class GameContainer extends Component {
     }
 
     resetTurn() {
-        this.props.takeTurnSwitchTeams(this.props.params.gameroom, '', '', this.state.whosTurn === 'red' ? 'blue' : 'red');
+        
         if (!this.state.isTimed) {
             this.setState({showTurnButton: false});
+        } else {
+            clearInterval(this.state.interval);
+            // safety for interval
+            setTimeout(() => {
+                this.props.sendTick(this.state.originalTime, this.props.params.gameroom);
+                this.setState({showTurnButton: false, timerTicking: false, secondsLeft: this.state.originalTime});
+            }, 100);
         }
+        this.props.takeTurnSwitchTeams(this.props.params.gameroom, '', '', this.state.whosTurn === 'red' ? 'blue' : 'red');
     }
 
     toggleControlPanel = () => {
@@ -208,7 +222,7 @@ class GameContainer extends Component {
                         <div className="master-display"> 
                             <ul className="spy-list"><span className="green-text">Blue Team:</span>
 
-                            {this.state.blueTeamMembers.length ? this.state.blueTeamMembers.map(member => {
+                            {this.state.blueTeamMembers && this.state.blueTeamMembers.length ? this.state.blueTeamMembers.map(member => {
                                 if (this.state.blueMaster.find(master => master.id === member.id)) {
                                     return <li> {member.name} (master) </li>
                                 }
@@ -220,7 +234,7 @@ class GameContainer extends Component {
 
                             <ul className="spy-list"><span className="green-text">Red Team:</span>
 
-                            {this.state.redTeamMembers.length ? this.state.redTeamMembers.map(member => {
+                            {this.state.redTeamMembers && this.state.redTeamMembers.length ? this.state.redTeamMembers.map(member => {
                                 if (this.state.redMaster.find(master => master.id === member.id)) {
                                     return <li> {member.name} (master) </li>
                                 }
@@ -268,18 +282,24 @@ class GameContainer extends Component {
                                 </div>
                                 <button className="normalbutton" type="submit">Share Clue!</button>
                             </form> 
-                            {this.state.secondsLeft > 0 && this.state.secondsLeft !== this.state.originalTime ?
-                                <div className="its-time">
-                                    <span className="its-clue">{ this.state.activeClue.word }</span>
-                                    <span className="its-guesses">{ this.state.activeClue.num } guesses</span>
-                                     { this.state.isTimed ? Math.floor(this.state.secondsLeft / 1000) : null }
-                                </div> : null}
-                            {this.state.showTurnButton && this.state.whosTurn === this.state.team && this.state.isMaster ? 
-                                <button onClick={() => this.resetTurn()} className="normalbutton">End Turn</button>
-                             : null}
-
-
-                        </div> : null}
+                        </div> : 
+                    <div className="clue-section">
+                        {this.state.secondsLeft > 0 && this.state.secondsLeft !== this.state.originalTime ?
+                            <div>
+                                
+                                    <div className={css([animations.flipIn])}> 
+                                        <span className="its-clue">{ this.state.activeClue.word ? this.state.activeClue.word.toUpperCase() : null }</span>
+                                    </div>
+                                    <span className="its-time">{ this.state.isTimed ? Math.floor(this.state.secondsLeft / 1000) + ' seconds' : null }</span>
+                                
+                                { this.state.activeClue.num ? <div className="its-guesses">({ this.state.activeClue.num } guesses)</div> : null }
+                                
+                            </div> : null}
+                        {this.state.showTurnButton && this.state.whosTurn === this.state.team && this.state.isMaster ? 
+                            <button onClick={() => this.resetTurn()} className="normalbutton">End Turn</button>
+                        : null} 
+                    </div>}
+                        
                     </div>
                </div>
             </div>
