@@ -4,6 +4,21 @@ import { initGameState, chooseCard, takeTurn, acceptGameOver, sendNewTick, local
 import { firebaseDb } from '../utils/firebase';
 import Chat from './chat.jsx';
 
+
+import { slideInDown, flipInY } from 'react-animations';
+import { StyleSheet, css } from 'aphrodite';
+
+const animations = StyleSheet.create({
+    slidedown: {
+      animationName: slideInDown,
+      animationDuration: '1s'
+    },
+    flipIn: {
+        animationName: flipInY,
+        animationDuration: '1s'
+    },
+  });
+  
 class GameContainer extends Component {
 
     constructor(props) {
@@ -25,7 +40,11 @@ class GameContainer extends Component {
             secondsLeft: null,
             showTurnButton: false,
             originalTime: 0,
-            copied: false
+            copied: false,
+            showControlPanel: false,
+            redTeamMembers: [],
+            blueTeamMembers: [],
+            interval: null,
         };
         this.ref = firebaseDb.ref(`games/${this.props.params.gameroom}`);
         this.ref.on('value', this.onChange.bind(this));
@@ -39,7 +58,6 @@ class GameContainer extends Component {
         let redMaster = gameState.red ? gameState.red.filter(member => member.type !== 'normal') : [];
         let advantage = gameState.blueSpots.length > gameState.redSpots.length ? 'blue' : 'red';
         let whosTurn = gameState.currentTurn == null ? advantage : gameState.currentTurn;
-
         let secLeft = this.state.secondsLeft;
 
         if (secLeft == null || (!gameState.tick || gameState.tick < 0)) {
@@ -51,6 +69,8 @@ class GameContainer extends Component {
 
         this.setState({ gameState: this.state.gameState == null ? gameState : this.state.gameState, 
                         team: this.props.params.team,
+                        redTeamMembers: gameState.red,
+                        blueTeamMembers: gameState.blue,
                         isMaster: this.determineIfMaster(gameState),
                         blueMaster: blueMaster, 
                         redMaster: redMaster, 
@@ -62,7 +82,8 @@ class GameContainer extends Component {
                         originalTime:  (gameState.timer * 1000) * 60,
                         secondsLeft: secLeft,
                         activeClue: { word: gameState.activeWord, num: gameState.activeNum },
-                        gameOver: gameState.gameOver || this.state.gameState ? this.state.gameState.gameOver : false })
+                        gameOver: gameState.gameOver || this.state.gameState ? this.state.gameState.gameOver : false });
+        this.props.init({room: this.props.params.gameroom});
     }
 
     componentDidMount() {
@@ -136,7 +157,7 @@ class GameContainer extends Component {
         event.preventDefault();
         this.props.takeTurnSwitchTeams(this.props.params.gameroom, this.state.clue.word, this.state.clue.num, this.state.whosTurn)
         if (this.state.isTimed) {
-            this.setState({timerTicking: true});
+            this.setState({timerTicking: true, showTurnButton: true});
             let interval = setInterval(() => {
                 this.props.sendTick(this.state.secondsLeft - 1000, this.props.params.gameroom);
                 this.setState({secondsLeft: this.state.secondsLeft - 1000});
@@ -146,6 +167,7 @@ class GameContainer extends Component {
                     this.resetTurn();
                 }
             }, 1000);
+            this.setState({interval: interval});
         } else {
             this.props.sendTick(1000, this.props.params.gameroom);
             this.setState({showTurnButton: true})
@@ -153,10 +175,22 @@ class GameContainer extends Component {
     }
 
     resetTurn() {
-        this.props.takeTurnSwitchTeams(this.props.params.gameroom, '', '', this.state.whosTurn === 'red' ? 'blue' : 'red');
+        
         if (!this.state.isTimed) {
             this.setState({showTurnButton: false});
+        } else {
+            clearInterval(this.state.interval);
+            // safety for interval
+            setTimeout(() => {
+                this.props.sendTick(this.state.originalTime, this.props.params.gameroom);
+                this.setState({showTurnButton: false, timerTicking: false, secondsLeft: this.state.originalTime});
+            }, 100);
         }
+        this.props.takeTurnSwitchTeams(this.props.params.gameroom, '', '', this.state.whosTurn === 'red' ? 'blue' : 'red');
+    }
+
+    toggleControlPanel = () => {
+        this.setState({showControlPanel: !this.state.showControlPanel});
     }
 
     brieflyDisplayCopy = () => {
@@ -169,73 +203,104 @@ class GameContainer extends Component {
         this.setState({copied: true});
         setTimeout(() => {
             this.setState({copied: false});
-        }, 5000);
+        }, 3000);
     }
 
     render() {
         return (
             <div className={this.state.whosTurn}>
-               {// this.state.gameOver ? 
-               // <div>
-                // <h1> accept ur fate </h1>
-               //  <button onClick={this.acceptFate}>okay</button>
-               //</div> : null
-                }
-                <Chat />
-               <h1>Secret Code to Join: <span id="roomcode"> {this.props.params.gameroom} </span> </h1> 
-               <div>{this.props.params.gameroom}</div>
-                    <button onClick={this.brieflyDisplayCopy}>Copy to clipboard with button</button>
-               {this.state.copied ? <p>copied!</p> : null}
-               <p>{this.state.firstTeam} goes first</p>
-                {this.state.isMaster && this.state.whosTurn === this.state.team && (this.state.secondsLeft <= 0 || this.state.secondsLeft === this.state.originalTime)? 
-                <form id="" role="form" onSubmit={this.takeYourTurn}>
-                    <label>Enter Your Clue Word</label>
-                    <input
-                    value={this.state.clue.word} onChange={this.handleActiveClue} 
-                    className="form-control" placeholder="ONE WORD!"
-                    id="word"
-                    />
-                    <div className="form-group">
-                    <label>How Many Guesses?</label>
-                        <input
-                            min="0" max="20"
-                            id="num"
-                            type="number"
-                            value={this.state.clue.num} onChange={this.handleActiveClue} 
-                            className="form-control" placeholder="1"
-                        />
-                    </div>
-                    <button type="submit" className="btn btn-default btn-block">Share Clue!</button>
-                </form> : null}
 
-                {this.state.showTurnButton && this.state.whosTurn === this.state.team && this.state.isMaster ? 
-                    <button onClick={() => this.resetTurn()} className="btn btn-default btn-block">End Turn</button>
-                 : null}
-
-                {this.state.secondsLeft > 0 && this.state.secondsLeft !== this.state.originalTime ?
-                    <div>
-                        <h1>{ this.state.activeClue.word } { this.state.activeClue.num } </h1>
-                         { this.state.isTimed ? Math.floor(this.state.secondsLeft / 1000) : null }
-                    </div> : null}
-
-               <div className="gameInfo">
-               <h4>The Blue Masters</h4>
-               {this.state.blueMaster.length ? this.state.blueMaster.map(master => {
-                   return <p> { master.name } </p>
-               }) : null }
-               <h4>The Red Masters</h4>
-                {this.state.redMaster.length ? this.state.redMaster.map(master => {
-                   return <p> { master.name } </p>
-               }) : null }
-               </div>
-               <p>{this.state.isMaster ? `(YOU ARE A CLUE GIVER! for ${this.state.team} )` : 'You are a normal player and not a clue giver'}</p>
-               <div className="board">
-                    {this.state.gameState && this.state.gameState.words ?
-                    this.state.gameState.words.map((word, i) =>
-                        <div className="card">
-                            <button key={i} className={this.determineClassName(i)} value="word" onClick={() => this.handleSelection(i)}>{word}</button>
+                {this.state.showControlPanel ? <div className={css([animations.slidedown])}> 
+                    <div className="control-panel">
+                        <div className="alias-display">
+                            <span className="green-text">Your Alias:</span> {this.state.isMaster ? `${this.props.params.player}, a spy master for the ${this.state.team} team.` : `${this.props.params.player} on the ${this.state.team} team.`} <br />
+                            <span className="green-text">Secret Code to Join:</span> <span id="roomcode"> {this.props.params.gameroom} </span>
+                            <button className="normalbutton" onClick={this.brieflyDisplayCopy}>Copy to clipboard</button>
+                            {this.state.copied ? <p>copied!</p> : null} 
+                            <br />
                         </div>
-                ) : null}
+                        <div className="master-display"> 
+                            <ul className="spy-list"><span className="green-text">Blue Team:</span>
+
+                            {this.state.blueTeamMembers && this.state.blueTeamMembers.length ? this.state.blueTeamMembers.map(member => {
+                                if (this.state.blueMaster.find(master => master.id === member.id)) {
+                                    return <li> {member.name} (master) </li>
+                                }
+                                else {
+                                    return <li> {member.name} </li>
+                                }
+                            })  : <li>none</li>}
+                            </ul>
+
+                            <ul className="spy-list"><span className="green-text">Red Team:</span>
+
+                            {this.state.redTeamMembers && this.state.redTeamMembers.length ? this.state.redTeamMembers.map(member => {
+                                if (this.state.redMaster.find(master => master.id === member.id)) {
+                                    return <li> {member.name} (master) </li>
+                                }
+                                else {
+                                    return <li> {member.name} </li>
+                                }
+                            })  : <li>none</li> }
+
+                            </ul>
+                        </div>
+                    </div>
+                    <button className="normalbutton"  onClick={() => this.toggleControlPanel()}>Hide ▲</button>
+                </div>  
+                : <button className="normalbutton" onClick={() => this.toggleControlPanel()}>Control Panel ▼</button> }
+
+               <div className="board-container">
+                    <div className="board">
+                            {this.state.gameState && this.state.gameState.words ?
+                            this.state.gameState.words.map((word, i) =>
+                                <div className="card">
+                                    <button key={i} className={this.determineClassName(i)} value="word" onClick={() => this.handleSelection(i)}>{word}</button>
+                                </div>
+                        ) : null}
+                    </div>
+                    <div className="chat">
+                        <Chat />
+                        {this.state.isMaster && this.state.whosTurn === this.state.team && (this.state.secondsLeft <= 0 || this.state.secondsLeft === this.state.originalTime) ? 
+                        <div className="clue-section">
+                            <form role="form" onSubmit={this.takeYourTurn}>
+                                <label>Enter Clue Word</label>
+                                <input
+                                value={this.state.clue.word} onChange={this.handleActiveClue} 
+                                className="form-control" placeholder="ONE WORD!"
+                                id="word"
+                                />
+                                <div className="form-group">
+                                <label>Number of Guesses</label>
+                                    <input
+                                        min="0" max="20"
+                                        id="num"
+                                        type="number"
+                                        value={this.state.clue.num} onChange={this.handleActiveClue} 
+                                        className="form-control" placeholder="1"
+                                    />
+                                </div>
+                                <button className="normalbutton" type="submit">Share Clue!</button>
+                            </form> 
+                        </div> : 
+                    <div className="clue-section">
+                        {this.state.secondsLeft > 0 && this.state.secondsLeft !== this.state.originalTime ?
+                            <div>
+                                
+                                    <div className={css([animations.flipIn])}> 
+                                        <span className="its-clue">{ this.state.activeClue.word ? this.state.activeClue.word.toUpperCase() : null }</span>
+                                    </div>
+                                    <span className="its-time">{ this.state.isTimed ? Math.floor(this.state.secondsLeft / 1000) + ' seconds' : null }</span>
+                                
+                                { this.state.activeClue.num ? <div className="its-guesses">({ this.state.activeClue.num } guesses)</div> : null }
+                                
+                            </div> : null}
+                        {this.state.showTurnButton && this.state.whosTurn === this.state.team && this.state.isMaster ? 
+                            <button onClick={() => this.resetTurn()} className="normalbutton">End Turn</button>
+                        : null} 
+                    </div>}
+                        
+                    </div>
                </div>
             </div>
 

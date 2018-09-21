@@ -1,34 +1,111 @@
+
 body {
   font-size: 16px;
 }
 
-.game-container {
+.new-game {
+  float: right;
+}
 
+.game-container {
+  font-family: 'Courier New', Courier, monospace;
+}
+
+.master-display {
+  float: right;
+  display: flex;
+}
+
+.alias-display {
+  float: left;
+}
+
+p {
+  color: #fff !important;
 }
 
 .red {
-  padding: 100px;
-  background-color: rgba(224, 102, 102, 0.397);
-}
+  background: linear-gradient(3deg, #a93636, #a67171, #762727, #983131);
+  background-size: 800% 800%;
+  
+  -webkit-animation: redimation 400s ease infinite;
+  animation: redimation 400s ease infinite;
+  
+  @-webkit-keyframes redimation {
+      0%{background-position:31% 0%}
+      50%{background-position:70% 100%}
+      100%{background-position:31% 0%}
+  }
+  @keyframes redimation { 
+      0%{background-position:31% 0%}
+      50%{background-position:70% 100%}
+      100%{background-position:31% 0%}
+  }
+ }
 
 .blue {
-  background-color: hsl(185, 35%, 88%);
-  padding: 100px;
+  background: linear-gradient(3deg, #273d61, #40435d, #072030, #373a47);
+  background-size: 800% 800%;
+  
+  -webkit-animation: bluemation 400s ease infinite;
+  animation: bluemation 400s ease infinite;
+  
+  @-webkit-keyframes bluemation {
+      0%{background-position:31% 0%}
+      50%{background-position:70% 100%}
+      100%{background-position:31% 0%}
+  }
+  @keyframes bluemation { 
+      0%{background-position:31% 0%}
+      50%{background-position:70% 100%}
+      100%{background-position:31% 0%}
+  }
 }
 
 .word-button {
   width: 10em;
-  height: 5em;
+  height: 7em;
 }
 
 .blue-spot {
-  background-color: paleturquoise;
+  background-color: #1d3b71;
+  color: #fff;
+}
+
+.board-container {
+  display: flex;
+  padding: 55px;
+  padding-bottom: 200px;
 }
 
 .board {
-  display: grid;
+  display: inline-grid;
   grid-template-columns: 10em 10em 10em 10em 10em;
   grid-gap: 1px;
+  float: left;
+}
+
+.chat {
+  float: right;
+  background-color: rgba(0, 0, 0, 0.397);
+  color: #fff;
+  margin-left: 25px;
+  height: 400px;
+}
+
+.clue-section {
+  padding-top: 25px;
+  color: #fff;
+}
+
+.sent-chats {
+  height: 320px;
+  overflow-y: scroll;
+  padding: 20px;
+}
+
+button {
+  border-width: 0px;
 }
 
 .gameInfo {
@@ -38,21 +115,41 @@ body {
 }
 
 .red-spot {
-  background-color: rgb(238, 195, 175);
+  background-color: #741212;
+  color: #fff;
 }
 
 .dead-spot {
-  background-color: grey;
+  background-color: rgb(27, 27, 27);
+  color: #fff;
 }
 
 .civ-spot {
-  background-color: lightgoldenrodyellow;
+  background-color: #e7d283;
 }
 
 .overlay {
-  background-color: #fff;
-  color: #fff;
+  background-color: #e7e7e7;
+  color: #f9f9f9;
  }
+
+ .its-time {
+  color: #ffffff !important;
+  font-size: 30px;
+ }
+
+ .its-clue {
+  color: #bbff00 !important;
+  font-size: 50px;
+  font-weight: normal;
+}
+
+.its-guesses {
+  color: #fff !important;
+  font-weight: normal;
+  font-size: 16px;
+  padding: 5px;
+}
 
  .wrapper {
   display: grid;
@@ -68,4 +165,135 @@ body {
   border-radius: 5px;
   padding: 20px;
   font-size: 150%;
+}
+
+.control-panel {
+  color: #fff !important;
+  background-color: #222222;
+  padding: 28px;
+  height: 133px
+}
+
+#roomcode {
+  color: #ff3c00 !important;
+}
+
+.green-text {
+  color: #bbff00 !important;
+  font-weight: bolder;
+}
+
+select {
+  color: #2b301c !important;
+}
+
+.coral-text {
+  color: #ff6666 !important;
+  font-weight: bolder;
+}
+
+.spy-list {
+  height: 80px;
+  overflow-y: scroll;
+}
+
+.new-game {
+  background: #4a4a4a;
+  width: 100%;
+  padding: 100px;
+  padding-bottom: 300px;
+  color: #fff;
+}
+
+// just some bootstrap overrides
+.top {
+  background-color: black;
+  color: black;
+  z-index: 1000;
+}
+
+a {
+  font-family: 'Courier New', Courier, monospace;
+  color: #bbff00 !important;
+}
+
+.play-button {
+  padding: 13px;
+}
+
+input {
+  background-color: #222222 !important;
+  color: #bbff00bd !important;
+  border-top: transparent !important;
+  border-left: transparent !important;
+  border-right: transparent !important;
+  border-bottom: transparent !important;
+}
+
+.nav :hover {
+  background-color: #222222 !important;
+  color: #bbff00bd !important;
+}
+
+.nav :focus {
+  background-color: #222222 !important;
+  color: #bbff00bd !important;
+}
+
+.normalbutton {
+  top: 0;
+  padding: 0 25.600000381469727px;
+  border: 1px solid rgb(225,225,225);
+  color: rgb(102, 102, 102);
+  text-align: center;
+  -o-text-overflow: clip;
+  text-overflow: clip;
+  background: -webkit-linear-gradient(0deg, rgb(243,243,243) 0, rgb(233,233,233) 100%), rgb(238, 238, 238);
+  background: -moz-linear-gradient(90deg, rgb(243,243,243) 0, rgb(233,233,233) 100%), rgb(238, 238, 238);
+  background: linear-gradient(90deg, rgb(243,243,243) 0, rgb(233,233,233) 100%), rgb(238, 238, 238);
+  -webkit-background-origin: padding-box;
+  background-origin: padding-box;
+  -webkit-background-clip: border-box;
+  background-clip: border-box;
+  -webkit-background-size: auto auto;
+  background-size: auto auto;
+  -webkit-box-shadow: 0 1px 0 0 rgba(255,255,255,0.298039) inset, 0 -1px 1px 0 rgba(255,255,255,0.14902) inset, 0 7px 0 0 rgb(187,187,187) , 0 8px 3px 0 rgba(0,0,0,0.2) ;
+  box-shadow: 0 1px 0 0 rgba(255,255,255,0.298039) inset, 0 -1px 1px 0 rgba(255,255,255,0.14902) inset, 0 7px 0 0 rgb(187,187,187) , 0 8px 3px 0 rgba(0,0,0,0.2) ;
+  -webkit-transition: all 0.1s cubic-bezier(0.25, 0.25, 0.75, 0.75);
+  -moz-transition: all 0.1s cubic-bezier(0.25, 0.25, 0.75, 0.75);
+  -o-transition: all 0.1s cubic-bezier(0.25, 0.25, 0.75, 0.75);
+  transition: all 0.1s cubic-bezier(0.25, 0.25, 0.75, 0.75);
+}
+
+.normalbutton:hover {
+  color: rgba(135,135,135,1);
+  background: -webkit-linear-gradient(-90deg, rgb(255,255,255) 0, rgb(235,235,235) 100%), -webkit-linear-gradient(0deg, rgb(243,243,243) 0, rgb(233,233,233) 100%), rgb(238, 238, 238);
+  background: -moz-linear-gradient(180deg, rgb(255,255,255) 0, rgb(235,235,235) 100%), -moz-linear-gradient(90deg, rgb(243,243,243) 0, rgb(233,233,233) 100%), rgb(238, 238, 238);
+  background: linear-gradient(180deg, rgb(255,255,255) 0, rgb(235,235,235) 100%), linear-gradient(90deg, rgb(243,243,243) 0, rgb(233,233,233) 100%), rgb(238, 238, 238);
+  -webkit-background-origin: padding-box;
+  background-origin: padding-box;
+  -webkit-background-clip: border-box;
+  background-clip: border-box;
+  -webkit-background-size: auto auto;
+  background-size: auto auto;
+}
+
+.normalbutton:active {
+  top: 6px;
+  color: rgba(160,160,160,1);
+  background: -webkit-linear-gradient(-90deg, rgb(255,255,255) 0, rgb(235,235,235) 100%), rgb(255, 255, 255);
+  background: -moz-linear-gradient(180deg, rgb(255,255,255) 0, rgb(235,235,235) 100%), rgb(255, 255, 255);
+  background: linear-gradient(180deg, rgb(255,255,255) 0, rgb(235,235,235) 100%), rgb(255, 255, 255);
+  -webkit-background-origin: padding-box;
+  background-origin: padding-box;
+  -webkit-background-clip: border-box;
+  background-clip: border-box;
+  -webkit-background-size: auto auto;
+  background-size: auto auto;
+  -webkit-box-shadow: 0 1px 0 0 rgba(255,255,255,0.298039) inset, 0 -1px 1px 0 rgba(255,255,255,0.14902) inset;
+  box-shadow: 0 1px 0 0 rgba(255,255,255,0.298039) inset, 0 -1px 1px 0 rgba(255,255,255,0.14902) inset;
+  -webkit-transition: all 50ms cubic-bezier(0.25, 0.25, 0.75, 0.75);
+  -moz-transition: all 50ms cubic-bezier(0.25, 0.25, 0.75, 0.75);
+  -o-transition: all 50ms cubic-bezier(0.25, 0.25, 0.75, 0.75);
+  transition: all 50ms cubic-bezier(0.25, 0.25, 0.75, 0.75);
 }
