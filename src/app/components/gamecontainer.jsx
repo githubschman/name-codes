@@ -169,7 +169,7 @@ class GameContainer extends Component {
             }, 1000);
             this.setState({interval: interval});
         } else {
-            this.props.sendTick(1000, this.props.params.gameroom);
+            this.props.sendTick(2, this.props.params.gameroom);
             this.setState({showTurnButton: true})
         }
     }
@@ -177,6 +177,7 @@ class GameContainer extends Component {
     resetTurn() {
         
         if (!this.state.isTimed) {
+            this.props.sendTick(1, this.props.params.gameroom);
             this.setState({showTurnButton: false});
         } else {
             clearInterval(this.state.interval);
@@ -261,7 +262,7 @@ class GameContainer extends Component {
                     </div>
                     <div className="chat">
                         <Chat />
-                        {this.state.isMaster && this.state.whosTurn === this.state.team && (this.state.secondsLeft <= 0 || this.state.secondsLeft === this.state.originalTime) ? 
+                        {this.state.isMaster && this.state.whosTurn === this.state.team && (this.state.secondsLeft <= 1|| this.state.secondsLeft === this.state.originalTime) ? 
                         <div className="clue-section">
                             <form role="form" onSubmit={this.takeYourTurn}>
                                 <label>Enter Clue Word</label>
@@ -284,13 +285,13 @@ class GameContainer extends Component {
                             </form> 
                         </div> : 
                     <div className="clue-section">
-                        {this.state.secondsLeft > 0 && this.state.secondsLeft !== this.state.originalTime ?
+                        {this.state.secondsLeft >= 2 && this.state.secondsLeft !== this.state.originalTime ?
                             <div>
-                                
-                                    <div className={css([animations.flipIn])}> 
-                                        <span className="its-clue">{ this.state.activeClue.word ? this.state.activeClue.word.toUpperCase() : null }</span>
-                                    </div>
-                                    <span className="its-time">{ this.state.isTimed ? Math.floor(this.state.secondsLeft / 1000) + ' seconds' : null }</span>
+                            
+                                <div className={css([animations.flipIn])}> 
+                                    <span className="its-clue">{ this.state.activeClue.word ? this.state.activeClue.word.toUpperCase() : null }</span>
+                                </div>
+                                <span className="its-time">{ this.state.isTimed ? Math.floor(this.state.secondsLeft / 1000) + ' seconds' : null }</span>
                                 
                                 { this.state.activeClue.num ? <div className="its-guesses">({ this.state.activeClue.num } guesses)</div> : null }
                                 
