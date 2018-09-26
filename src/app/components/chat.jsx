@@ -69,7 +69,7 @@ class Chat extends Component {
         return (
             <div>
                 <div className="sent-chats">{this.state.chats && this.state.chats.map(chat => {
-                    return <div><span className={this.state.chatColor}>{chat.name}:</span> {chat.content} </div>
+                    return <div><span className={this.state.chatColor}>agent-message:{chat.name.split(' ').join('-').toLowerCase()}$</span> {chat.content}</div>
                 })}
                 <div style={{ float:"left", clear: "both" }}
                     ref={(el) => { this.messagesEnd = el; }}>

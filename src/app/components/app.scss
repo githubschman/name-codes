@@ -85,6 +85,21 @@ p {
   float: left;
 }
 
+.home {
+  background-color: #000;
+  color: #bbff00;
+  position: fixed;
+  top: 50px;
+  margin: 0;
+  vertical-align: middle;
+  width: 100%;
+  height: 100%;
+  padding-left: 10%;
+  .exp {
+    color: #fff !important;
+  }
+}
+
 .chat {
   float: right;
   background-color: rgba(0, 0, 0, 0.397);
