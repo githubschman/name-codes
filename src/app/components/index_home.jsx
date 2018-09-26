@@ -22,9 +22,7 @@ class Home extends Component {
       titleFull: '> NAME CODES',
       title: '',
       explanationFull: ' it\'s like the tabletop game codenames \n but somehow different... \n because it\'s online \n \n other than that it\'s pretty much the same \n SQL> DROP DATABASE meaingOfLifeDB; \n lol jk this isnt a real terminal \n or is it?! \n \n \n anyway, have fun playing name codes! \n TLR is the hax 4 lyfe!',
-      explanation: '',
-      optionsFull: ['rules', 'play'],
-      options: ['','']
+      explanation: ''
     }
     this.triangleInterval = null;
   }
