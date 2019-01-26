@@ -312,3 +312,13 @@ input {
   -o-transition: all 50ms cubic-bezier(0.25, 0.25, 0.75, 0.75);
   transition: all 50ms cubic-bezier(0.25, 0.25, 0.75, 0.75);
 }
+
+.game-over {
+  width: 90%;
+  text-align: center;
+}
+
+.game-over-text {
+  color: #fff;
+  font-size: 80px;
+}

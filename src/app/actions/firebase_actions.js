@@ -79,16 +79,18 @@ export const sendNewTick = data => dispatch => {
   .catch(console.error)
 }
 
-export const chooseCard = (num, room, dead) => dispatch => {
+export const chooseCard = (num, room, dead, guesses) => dispatch => {
   firebaseDb.ref(`games/${room}`).once('value')
     .then(snapshot => snapshot.val())
     .then(gameRoom => {
       let newMoves = [...gameRoom.moves];
       newMoves[num] = true;
       gameRoom.gameOver = dead;
+      const newGuesses = guesses - 1;
       firebaseDb.ref(`games/${room}`).update({
         'moves': newMoves,
-        'gameOver': dead
+        'gameOver': dead,
+        'activeNum': newGuesses
       });
       dispatch(getGameState(gameRoom));
     })

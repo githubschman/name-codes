@@ -32,7 +32,7 @@ class GameContainer extends Component {
             moves: [],
             spaceClasses: [],
             firstTeam: '',
-            gameOver: false,
+            gameOver: null,
             whosTurn: '',
             clue: {word: '?', num: 0},
             activeClue: {word: '?', num: 0},
@@ -76,13 +76,13 @@ class GameContainer extends Component {
                         redMaster: redMaster, 
                         moves: gameState.moves, 
                         spaceClasses: gameState.spaceClasses, 
-                        firstTeam: advantage,
+                        firstTeam: advantage, // advantage team has 9, other 8
                         whosTurn: whosTurn,
                         isTimed: gameState.timer > 0,
                         originalTime:  (gameState.timer * 1000) * 60,
                         secondsLeft: secLeft,
                         activeClue: { word: gameState.activeWord, num: gameState.activeNum },
-                        gameOver: gameState.gameOver || this.state.gameState ? this.state.gameState.gameOver : false });
+                        gameOver: gameState.gameOver });
         this.props.init({room: this.props.params.gameroom});
     }
 
@@ -136,9 +136,41 @@ class GameContainer extends Component {
     handleSelection = (cardNum) => {
         if (!this.state.isMaster && this.state.team === this.state.whosTurn) {
             // only players (not spymasters) can make selections
-            let className = this.determineClassName(cardNum);
-            let dead = className === 'word-button dead-spot' ? true : false;
-            this.props.playerChoice(cardNum, this.props.params.gameroom, dead);
+            const className = this.state.spaceClasses[cardNum];
+            const dead = this.state.spaceClasses[cardNum] === 'dead-spot' ? true : false;
+            const innocentBystander = className === 'civ-spot' ? true : false;
+            const otherTeamsCard = className !== `${this.state.whosTurn}-spot`;
+            const guesses = Number(this.state.activeClue.num || 0);
+
+            if (guesses === 1 || innocentBystander || otherTeamsCard) {
+                this.resetTurn();
+            }
+
+            let redSpacesDone = 0;
+            let blueSpacesDone = 0;
+
+            this.state.moves.forEach((space, index) => {
+                if (space) {
+                    if (this.state.gameState.redSpots.includes(index)) {
+                        redSpacesDone++;
+                    } else if (this.state.gameState.blueSpots.includes(index)) {
+                        blueSpacesDone++;
+                    }
+                }
+            });
+
+            // lol
+            const redWinState = this.state.firstTeam === 'red' ? redSpacesDone === 9 : redSpacesDone === 8 || (this.state.whosTurn !== 'red' && dead);
+            const blueWinState = this.state.firstTeam === 'blue' ? blueSpacesDone === 9 : blueSpacesDone === 8 || (this.state.whosTurn !== 'blue' && dead);
+            let winState = null;
+            if (redWinState) {
+                winState = 'red'
+            } else if (blueWinState) {
+                winState = 'blue';
+            }
+
+
+            this.props.playerChoice(cardNum, this.props.params.gameroom, winState, guesses);
         }
     }
 
@@ -175,7 +207,6 @@ class GameContainer extends Component {
     }
 
     resetTurn() {
-        
         if (!this.state.isTimed) {
             this.props.sendTick(1, this.props.params.gameroom);
             this.setState({showTurnButton: false});
@@ -252,6 +283,7 @@ class GameContainer extends Component {
                 : <button className="normalbutton" onClick={() => this.toggleControlPanel()}>Control Panel ▼</button> }
 
                <div className="board-container">
+               {!this.state.gameOver || this.state.isMaster ?
                     <div className="board">
                             {this.state.gameState && this.state.gameState.words ?
                             this.state.gameState.words.map((word, i) =>
@@ -260,6 +292,12 @@ class GameContainer extends Component {
                                 </div>
                         ) : null}
                     </div>
+                     :
+                    <div className="game-over">
+                      <h1 className="game-over-text">{this.state.gameState && this.state.gameOver ? this.state.gameOver.toUpperCase() : '?'} WINS!</h1>
+                      <iframe src="https://giphy.com/embed/VZcYcxHiEyzsY" width="480" height="480" frameBorder="0" class="giphy-embed" allowFullScreen></iframe>
+                    </div>}
+
                     <div className="chat">
                         <Chat />
                         {this.state.isMaster && this.state.whosTurn === this.state.team && (this.state.secondsLeft <= 1|| this.state.secondsLeft === this.state.originalTime) ? 
@@ -274,7 +312,7 @@ class GameContainer extends Component {
                                 <div className="form-group">
                                 <label>Number of Guesses</label>
                                     <input
-                                        min="0" max="20"
+                                        min="0" max="25"
                                         id="num"
                                         type="number"
                                         value={this.state.clue.num} onChange={this.handleActiveClue} 
@@ -315,8 +353,8 @@ const mapDispatchToProps = function (dispatch) {
         init(room) {
             dispatch(initGameState(room));
         },
-        playerChoice(num, room, choiceType) {
-            dispatch(chooseCard(num, room, choiceType));
+        playerChoice(num, room, choiceType, guesses) {
+            dispatch(chooseCard(num, room, choiceType, guesses));
         },
         initGameOver(room) {
             dispatch(acceptGameOver(room))
