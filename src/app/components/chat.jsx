@@ -65,6 +65,12 @@ class Chat extends Component {
         }
     }
 
+    sendYikes = () => {
+        const yikesArr = ['😳','😟','😖','YIKES','😧', '😨'];
+        const rando = Math.floor(Math.random() * yikesArr.length);
+        this.props.emitMessage(yikesArr[rando], this.props.player.player, this.props.player.gameroom);
+    }
+
     render() {
         return (
             <div>
@@ -85,6 +91,7 @@ class Chat extends Component {
                         />
                     </div>
                     <button onClick={this.sendChat} className="normalbutton">emit message</button>
+                    <button onClick={this.sendYikes} className="normalbutton">yikes</button>
                     <br />
                 </div>
             </div>
