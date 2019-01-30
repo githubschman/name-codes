@@ -53,7 +53,10 @@ export const initGameState = data => dispatch => {
 
 export const takeTurn = data => dispatch => {
   const { room, word, num, team } = data;
-  firebaseDb.ref(`games/${room}`).once('value')
+  firebaseDb.ref(`games/${room}`)
+  .orderByChild('timestamp')
+  .limitToLast(2)
+  .once('value')
   .then(snapshot => snapshot.val())
   .then(gameRoom => {
     firebaseDb.ref(`games/${room}`).update({
@@ -68,7 +71,10 @@ export const takeTurn = data => dispatch => {
 
 export const sendNewTick = data => dispatch => {
   const { room, sec } = data;
-  firebaseDb.ref(`games/${room}`).once('value')
+  firebaseDb.ref(`games/${room}`)
+  .orderByChild('timestamp')
+  .limitToLast(2)
+  .once('value')
   .then(snapshot => snapshot.val())
   .then(gameRoom => {
     firebaseDb.ref(`games/${room}`).update({

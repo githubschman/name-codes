@@ -116,8 +116,11 @@ class GameContainer extends Component {
     }
 
     componentWillReceiveProps(newProps) {
-        if (newProps && newProps.gameState) {
-            // 
+        if (this.state.isTimed && newProps && newProps.gameState && newProps.gameState.tick === 0) {
+            setTimeout(() => {
+                this.props.sendTick(this.state.originalTime, this.props.params.gameroom);
+                clearInterval(this.state.interval);
+            }, 100);
         }
     }
 
@@ -143,7 +146,10 @@ class GameContainer extends Component {
             const guesses = Number(this.state.activeClue.num || 0);
 
             if (guesses === 1 || innocentBystander || otherTeamsCard) {
-                this.resetTurn();
+                this.props.sendTick(0, this.props.params.gameroom);
+                clearInterval(this.state.interval);
+                this.setState({interval: null, timerTicking: false});
+                this.props.takeTurnSwitchTeams(this.props.params.gameroom, '', '', this.state.whosTurn === 'red' ? 'blue' : 'red');
             }
 
             let redSpacesDone = 0;
@@ -159,6 +165,14 @@ class GameContainer extends Component {
                 }
             });
 
+            if (!innocentBystander && !otherTeamsCard && !dead) {
+                if (this.state.whosTurn === 'red') {
+                    redSpacesDone++;
+                } else {
+                    blueSpacesDone++;
+                }
+            }
+
             // lol
             const redWinState = this.state.firstTeam === 'red' ? redSpacesDone === 9 : redSpacesDone === 8 || (this.state.whosTurn !== 'red' && dead);
             const blueWinState = this.state.firstTeam === 'blue' ? blueSpacesDone === 9 : blueSpacesDone === 8 || (this.state.whosTurn !== 'blue' && dead);
@@ -168,7 +182,6 @@ class GameContainer extends Component {
             } else if (blueWinState) {
                 winState = 'blue';
             }
-
 
             this.props.playerChoice(cardNum, this.props.params.gameroom, winState, guesses);
         }
@@ -193,7 +206,7 @@ class GameContainer extends Component {
             let interval = setInterval(() => {
                 this.props.sendTick(this.state.secondsLeft - 1000, this.props.params.gameroom);
                 this.setState({secondsLeft: this.state.secondsLeft - 1000});
-                if (this.state.secondsLeft <= 0) {
+                if (this.state.secondsLeft <= 0 || this.state.timerTicking === false) {
                     clearInterval(interval);
                     this.setState({timerTicking: false, secondsLeft: this.state.originalTime});
                     this.resetTurn();
@@ -240,7 +253,7 @@ class GameContainer extends Component {
 
     render() {
         return (
-            <div className={this.state.whosTurn}>
+            <div className={this.state.gameOver || this.state.whosTurn}>
 
                 {this.state.showControlPanel ? <div className={css([animations.slidedown])}> 
                     <div className="control-panel">
@@ -300,7 +313,7 @@ class GameContainer extends Component {
 
                     <div className="chat">
                         <Chat />
-                        {this.state.isMaster && this.state.whosTurn === this.state.team && (this.state.secondsLeft <= 1|| this.state.secondsLeft === this.state.originalTime) ? 
+                        {this.state.isMaster && this.state.whosTurn === this.state.team && (this.state.secondsLeft <= 1 || this.state.secondsLeft === this.state.originalTime) ? 
                         <div className="clue-section">
                             <form role="form" onSubmit={this.takeYourTurn}>
                                 <label>Enter Clue Word</label>
@@ -312,7 +325,7 @@ class GameContainer extends Component {
                                 <div className="form-group">
                                 <label>Number of Guesses</label>
                                     <input
-                                        min="0" max="25"
+                                        min="1" max="25"
                                         id="num"
                                         type="number"
                                         value={this.state.clue.num} onChange={this.handleActiveClue} 
