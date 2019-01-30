@@ -117,10 +117,10 @@ class GameContainer extends Component {
 
     componentWillReceiveProps(newProps) {
         if (this.state.isTimed && newProps && newProps.gameState && newProps.gameState.tick === 0) {
-            setTimeout(() => {
-                this.props.sendTick(this.state.originalTime, this.props.params.gameroom);
-                clearInterval(this.state.interval);
-            }, 100);
+            // setTimeout(() => {
+            //     this.props.sendTick(this.state.originalTime, this.props.params.gameroom);
+            //     clearInterval(this.state.interval);
+            // }, 100);
         }
     }
 
@@ -137,19 +137,16 @@ class GameContainer extends Component {
     }
 
     handleSelection = (cardNum) => {
-        if (!this.state.isMaster && this.state.team === this.state.whosTurn) {
+        if (!this.state.isMaster && this.state.team === this.state.whosTurn && Number(this.state.activeClue.num) >= 1) {
             // only players (not spymasters) can make selections
             const className = this.state.spaceClasses[cardNum];
             const dead = this.state.spaceClasses[cardNum] === 'dead-spot' ? true : false;
             const innocentBystander = className === 'civ-spot' ? true : false;
             const otherTeamsCard = className !== `${this.state.whosTurn}-spot`;
-            const guesses = Number(this.state.activeClue.num || 0);
+            let guesses = Number(this.state.activeClue.num || 0);
 
-            if (guesses === 1 || innocentBystander || otherTeamsCard) {
-                this.props.sendTick(0, this.props.params.gameroom);
-                clearInterval(this.state.interval);
-                this.setState({interval: null, timerTicking: false});
-                this.props.takeTurnSwitchTeams(this.props.params.gameroom, '', '', this.state.whosTurn === 'red' ? 'blue' : 'red');
+            if (innocentBystander || otherTeamsCard) {
+                guesses = 1;
             }
 
             let redSpacesDone = 0;
@@ -340,15 +337,15 @@ class GameContainer extends Component {
                             <div>
                             
                                 <div className={css([animations.flipIn])}> 
-                                    <span className="its-clue">{ this.state.activeClue.word ? this.state.activeClue.word.toUpperCase() : null }</span>
+                                    <span className="its-clue">{ this.state.activeClue.word && this.state.activeClue.num ? this.state.activeClue.word.toUpperCase() : null }</span>
                                 </div>
-                                <span className="its-time">{ this.state.isTimed ? Math.floor(this.state.secondsLeft / 1000) + ' seconds' : null }</span>
+                                <span className="its-time">{ this.state.isTimed && this.state.activeClue.num ? Math.floor(this.state.secondsLeft / 1000) + ' seconds' : null }</span>
                                 
                                 { this.state.activeClue.num ? <div className="its-guesses">({ this.state.activeClue.num } guesses)</div> : null }
                                 
                             </div> : null}
                         {this.state.showTurnButton && this.state.whosTurn === this.state.team && this.state.isMaster ? 
-                            <button onClick={() => this.resetTurn()} className="normalbutton">End Turn</button>
+                            <button onClick={() => this.resetTurn()} className="normalbutton">{Number(this.state.activeClue.num) > 0 ? 'End Turn' : 'GIVE UP'} </button>
                         : null} 
                     </div>}
                         
