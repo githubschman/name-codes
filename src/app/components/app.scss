@@ -114,7 +114,7 @@ p {
 }
 
 .sent-chats {
-  height: 320px;
+  height: 300px;
   overflow-y: scroll;
   padding: 20px;
 }
@@ -321,4 +321,8 @@ input {
 .game-over-text {
   color: #fff;
   font-size: 80px;
+}
+
+.form-control {
+  margin-top: 5px;
 }

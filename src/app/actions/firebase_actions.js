@@ -4,7 +4,7 @@ import {
   GET_GAME_STATE,
   UPDATE_MOVES,
   GAME_OVER_ACCEPTED,
-  GET_USER_INFO
+  GET_USER_INFO,
 } from './types';
 
 
@@ -29,14 +29,14 @@ export function updateMoves(data) {
   };
 }
 
-export function gameOverAccepted(data) {  
+export function gameOverAccepted(data) {
   return {
       type: GAME_OVER_ACCEPTED,
       data
   };
 }
 
-export function getLocalUserInfo(data) {  
+export function getLocalUserInfo(data) {
   return {
       type: GET_USER_INFO,
       data

@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
-import { initGameState, chooseCard, takeTurn, acceptGameOver, sendNewTick, localUserData  } from '../actions/firebase_actions';
+import { initGameState, chooseCard, takeTurn, acceptGameOver, sendNewTick, localUserData, sendChat } from '../actions/firebase_actions';
 import { firebaseDb } from '../utils/firebase';
 import Chat from './chat.jsx';
 
@@ -93,6 +93,8 @@ class GameContainer extends Component {
         this.props.init({room: gameroom});
         this.setState({team: team})
         this.props.setUpPlayer({player, team, gameroom});
+        const welcomeMessage = `${player} joined the ${team} team!`;
+        this.props.emitMessage(welcomeMessage, 'agent-githubschman', gameroom);
     }
 
     determineIfMaster = (initialGameState) => {
@@ -197,7 +199,7 @@ class GameContainer extends Component {
 
     takeYourTurn = (event) => {
         event.preventDefault();
-        this.props.takeTurnSwitchTeams(this.props.params.gameroom, this.state.clue.word, this.state.clue.num, this.state.whosTurn)
+        this.props.takeTurnSwitchTeams(this.props.params.gameroom, this.state.clue.word, this.state.clue.num + 1, this.state.whosTurn)
         if (this.state.isTimed) {
             this.setState({timerTicking: true, showTurnButton: true});
             let interval = setInterval(() => {
@@ -236,11 +238,11 @@ class GameContainer extends Component {
     }
 
     brieflyDisplayCopy = () => {
-        let crazySolution = document.createElement('textarea')
+        let crazySolution = document.createElement('textarea');
         crazySolution.innerText = this.props.params.gameroom;
-        document.body.appendChild(crazySolution)
-        crazySolution.select()
-        document.execCommand('copy')
+        document.body.appendChild(crazySolution);
+        crazySolution.select();
+        document.execCommand('copy');
         crazySolution.remove();
         this.setState({copied: true});
         setTimeout(() => {
@@ -377,6 +379,9 @@ const mapDispatchToProps = function (dispatch) {
         },
         setUpPlayer(data) {
             dispatch(localUserData(data));
+        },
+        emitMessage(content, name, room) {
+            dispatch(sendChat({content, name, room}));
         }
     }
   };

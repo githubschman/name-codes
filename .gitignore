@@ -39,3 +39,7 @@ jspm_packages
 .idea/
 .vscode
 firebase-debug.log
+
+# firebase stuff
+dist
+.firebase
