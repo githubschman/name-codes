@@ -81,7 +81,7 @@ class GameContainer extends Component {
                         isTimed: gameState.timer > 0,
                         originalTime:  (gameState.timer * 1000) * 60,
                         secondsLeft: secLeft,
-                        activeClue: { word: gameState.activeWord, num: gameState.activeNum },
+                        activeClue: { word: gameState.activeWord, numGuesses: gameState.activeNumGuesses, num: gameState.activeNum },
                         gameOver: gameState.gameOver });
         this.props.init({room: this.props.params.gameroom});
     }
@@ -139,13 +139,13 @@ class GameContainer extends Component {
     }
 
     handleSelection = (cardNum) => {
-        if (!this.state.isMaster && this.state.team === this.state.whosTurn && Number(this.state.activeClue.num) >= 1) {
+        if (!this.state.isMaster && this.state.team === this.state.whosTurn && Number(this.state.activeClue.numGuesses) >= 1) {
             // only players (not spymasters) can make selections
             const className = this.state.spaceClasses[cardNum];
             const dead = this.state.spaceClasses[cardNum] === 'dead-spot' ? true : false;
             const innocentBystander = className === 'civ-spot' ? true : false;
             const otherTeamsCard = className !== `${this.state.whosTurn}-spot`;
-            let guesses = Number(this.state.activeClue.num || 0);
+            let guesses = Number(this.state.activeClue.numGuesses || 0);
 
             if (innocentBystander || otherTeamsCard) {
                 guesses = 1;
@@ -199,7 +199,7 @@ class GameContainer extends Component {
 
     takeYourTurn = (event) => {
         event.preventDefault();
-        this.props.takeTurnSwitchTeams(this.props.params.gameroom, this.state.clue.word, this.state.clue.num + 1, this.state.whosTurn)
+        this.props.takeTurnSwitchTeams(this.props.params.gameroom, this.state.clue.word, this.state.clue.num, this.state.whosTurn)
         if (this.state.isTimed) {
             this.setState({timerTicking: true, showTurnButton: true});
             let interval = setInterval(() => {
@@ -339,15 +339,17 @@ class GameContainer extends Component {
                             <div>
                             
                                 <div className={css([animations.flipIn])}> 
-                                    <span className="its-clue">{ this.state.activeClue.word && this.state.activeClue.num ? this.state.activeClue.word.toUpperCase() : null }</span>
+                                    <span className="its-clue">
+                                        { this.state.activeClue.word && this.state.activeClue.numGuesses ? `${this.state.activeClue.word.toUpperCase()} ${this.state.activeClue.num}` : null }
+                                    </span>
                                 </div>
-                                <span className="its-time">{ this.state.isTimed && this.state.activeClue.num ? Math.floor(this.state.secondsLeft / 1000) + ' seconds' : null }</span>
+                                <span className="its-time">{ this.state.isTimed && this.state.activeClue.numGuesses ? Math.floor(this.state.secondsLeft / 1000) + ' seconds' : null }</span>
                                 
-                                { this.state.activeClue.num ? <div className="its-guesses">({ this.state.activeClue.num } guesses)</div> : null }
+                                { this.state.activeClue.numGuesses ? <div className="its-guesses">({ this.state.activeClue.numGuesses } guesses)</div> : null }
                                 
                             </div> : null}
                         {this.state.showTurnButton && this.state.whosTurn === this.state.team && this.state.isMaster ? 
-                            <button onClick={() => this.resetTurn()} className="normalbutton">{Number(this.state.activeClue.num) > 0 ? 'End Turn' : 'GIVE UP'} </button>
+                            <button onClick={() => this.resetTurn()} className="normalbutton">{Number(this.state.activeClue.numGuesses) > 0 ? 'End Turn' : 'GIVE UP'} </button>
                         : null} 
                     </div>}
                         

@@ -62,7 +62,8 @@ export const takeTurn = data => dispatch => {
     firebaseDb.ref(`games/${room}`).update({
       'currentTurn': team, // team == 'reds' ? 'blue' : 'reds',
       'activeWord': word,
-      'activeNum': num
+      'activeNum': num,
+      'activeNumGuesses': num + 1 // Team can take a number of guesses equal to n + 1
     });
     dispatch(getGameState(gameRoom));
   })
@@ -96,7 +97,7 @@ export const chooseCard = (num, room, dead, guesses) => dispatch => {
       firebaseDb.ref(`games/${room}`).update({
         'moves': newMoves,
         'gameOver': dead,
-        'activeNum': newGuesses
+        'activeNumGuesses': newGuesses
       });
       dispatch(getGameState(gameRoom));
     })
